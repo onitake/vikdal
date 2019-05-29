@@ -4,6 +4,9 @@ A Dalvik bytecode disassembler, code graph generator and decompiler.
 
 It can read .dex and .apk files.
 
+:warning: This is a work in progress. In particular, decompilation does not
+work yet.
+
 ## Build
 
 Compile all Java sources in src/ and test/ .
