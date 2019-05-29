@@ -66,6 +66,9 @@ public class Browser {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
+					// Force some modern style settings
+					System.setProperty("awt.useSystemAAFontSettings", "on");
+					System.setProperty("swing.aatext", "true");
 					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 				} catch (Exception e) {
 					// Ignore - if we can't find a native L&F, just use the default 
