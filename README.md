@@ -11,7 +11,10 @@ work yet.
 
 Compile all Java sources in src/ and test/ .
 
-You need the JgraphT 0.8, JGraphX, AntLR and JavaParser libraries.
+You need the JgraphT, JGraphX, AntLR and JavaParser libraries.
+
+A Maven build file is provided, but JGraphX is missing because upstream does
+not upload builds to Maven Central. The .jar must be obtained elsewhere.
 
 ## Run
 
