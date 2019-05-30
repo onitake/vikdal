@@ -23,6 +23,7 @@ import ch.seto.vikdal.java.TryDescriptor;
 
 public class Dex implements SymbolTable {
 	
+	private static final int READ_BUFFER_SIZE = 4096;
 	private final static byte[] DEX_FILE_MAGIC = { 0x64, 0x65, 0x78, 0x0a };
 	private final static byte[] DEX_FILE_VERSION_009 = { 0x30, 0x30, 0x39, 0x00 };
 	private final static byte[] DEX_FILE_VERSION_013 = { 0x30, 0x31, 0x33, 0x00 };
@@ -373,31 +374,37 @@ public class Dex implements SymbolTable {
 		long checksum = reader.readLEUnsignedInt();
 		byte[] signature = new byte[20];
 		reader.read(signature);
-		Adler32 adler32 = new Adler32();
-		adler32.update(signature);
-		MessageDigest sha1 = null;
-		try {
-			sha1 = MessageDigest.getInstance("SHA1");
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		long headerPos = reader.getFilePointer();
-		long available = reader.length() - headerPos;
-		byte[] buffer = new byte[4096];
-		int len;
-		while (available > 0 && (len = reader.read(buffer, 0, (int) available)) != -1) {
-			adler32.update(buffer, 0, len);
-			if (sha1 != null) {
-				sha1.update(buffer, 0, len);
-			}
-			available -= len;
-		}
 		if (validate) {
-			if (adler32.getValue() != checksum) throw new DexFormatException("Invalid Adler32 checksum");
-			if (!Arrays.equals(sha1.digest(), signature)) throw new DexFormatException("Invalid SHA1 checksum");
+			Adler32 adler32 = new Adler32();
+			adler32.update(signature);
+			MessageDigest sha1 = null;
+			try {
+				sha1 = MessageDigest.getInstance("SHA1");
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+			long headerPos = reader.getFilePointer();
+			long available = reader.length() - headerPos;
+			byte[] buffer = new byte[READ_BUFFER_SIZE];
+			int len;
+			while (available > 0 && (len = reader.read(buffer, 0, (int) available)) != -1) {
+				adler32.update(buffer, 0, len);
+				if (sha1 != null) {
+					sha1.update(buffer, 0, len);
+				}
+				available -= len;
+			}
+			
+			if (adler32.getValue() != checksum) {
+				throw new DexFormatException("Invalid Adler32 checksum");
+			}
+			if (!Arrays.equals(sha1.digest(), signature)) {
+				throw new DexFormatException("Invalid SHA1 checksum");
+			}
+
+			//System.out.println(String.format("adler32=0x%08x checksum=0x%08x", adler32.getValue(), checksum));
+			reader.seek(headerPos);
 		}
-		//System.out.println(String.format("adler32=0x%08x checksum=0x%08x", adler32.getValue(), checksum));
-		reader.seek(headerPos);
 
 		file_size = reader.readLEUnsignedInt();
 		if (validate) {
