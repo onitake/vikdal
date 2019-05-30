@@ -74,7 +74,7 @@ public class IfTest extends AbstractInstruction {
 	
 	@Override
 	public String toString(SymbolTable table, StateTracker tracker) {
-		return "if (" + tracker.getRegisterName(vA) + " " + operation.operator + " " + tracker.getRegisterName(vB) + ") GOTO " + branch;
+		return "if (" + tracker.getRegisterName(vA) + " " + operation.operator + " " + tracker.getRegisterName(vB) + ") GOTO " + (branch >= 0 ? "+" : "") + branch;
 	}
 	
 }

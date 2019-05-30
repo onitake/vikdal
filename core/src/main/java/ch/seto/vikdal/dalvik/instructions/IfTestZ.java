@@ -68,7 +68,7 @@ public class IfTestZ extends AbstractInstruction {
 
 	@Override
 	public String toString() {
-		return "if (v" + vA + " " + operation.operator + " 0) GOTO " + branch;
+		return "if (v" + vA + " " + operation.operator + " 0) GOTO " + (branch >= 0 ? "+" : "") + branch;
 	}
 	
 	@Override
