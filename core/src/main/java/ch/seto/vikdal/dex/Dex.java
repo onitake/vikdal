@@ -581,21 +581,25 @@ public class Dex implements SymbolTable {
 					List<Map<Long, Map<Long, Value>>> args = new ArrayList<Map<Long, Map<Long, Value>>>((int) args_size);
 					for (int k = 0; k < (int) args_size; k++) {
 						long annotations_off = reader.readUnsignedInt();
-						long offset3 = reader.getFilePointer();
-						reader.seek(annotations_off);
-						Map<Long, Map<Long, Value>> annotations = new LinkedHashMap<Long, Map<Long, Value>>();
-						long size = reader.readUnsignedInt();
-						for (int l = 0; l < (int) size; l++) {
-							long annotation_off = reader.readUnsignedInt();
-							long offset4 = reader.getFilePointer();
-							reader.seek(annotation_off);
-							int visibility = reader.readUnsignedByte();
-							Map.Entry<Long, Map<Long, Value>> annotation = reader.readEncodedAnnotation();
-							annotations.put(annotation.getKey(), annotation.getValue());
-							reader.seek(offset4);
+						if (annotations_off != 0) {
+							long offset3 = reader.getFilePointer();
+							reader.seek(annotations_off);
+							Map<Long, Map<Long, Value>> annotations = new LinkedHashMap<Long, Map<Long, Value>>();
+							long size = reader.readUnsignedInt();
+							for (int l = 0; l < (int) size; l++) {
+								long annotation_off = reader.readUnsignedInt();
+								long offset4 = reader.getFilePointer();
+								reader.seek(annotation_off);
+								int visibility = reader.readUnsignedByte();
+								Map.Entry<Long, Map<Long, Value>> annotation = reader.readEncodedAnnotation();
+								annotations.put(annotation.getKey(), annotation.getValue());
+								reader.seek(offset4);
+							}
+							args.add(annotations);
+							reader.seek(offset3);
+						} else {
+							args.add(new LinkedHashMap<Long, Map<Long, Value>>());
 						}
-						args.add(annotations);
-						reader.seek(offset3);
 					}
 					klass.parameter_annotations.put(method_idx, args);
 					reader.seek(offset2);
