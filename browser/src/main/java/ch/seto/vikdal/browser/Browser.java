@@ -1,8 +1,6 @@
 package ch.seto.vikdal.browser;
 
 import java.io.*;
-import java.lang.ref.WeakReference;
-import java.net.URISyntaxException;
 
 import java.util.*;
 import java.util.List;
@@ -33,10 +31,8 @@ import ch.seto.vikdal.java.transformers.ProgramVerificationException;
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.util.mxConstants;
 import com.mxgraph.view.mxGraph;
 
-import org.jgrapht.DirectedGraph;
 import org.jgrapht.ext.JGraphXAdapter;
 
 import javax.swing.SwingWorker.StateValue;
@@ -229,7 +225,7 @@ public class Browser {
 			}
 		});
 		openMenuItem.setMnemonic('o');
-		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+		openMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK));
 		fileMenu.add(openMenuItem);
 		
 		JSeparator separator = new JSeparator();
@@ -241,7 +237,7 @@ public class Browser {
 				System.exit(0);
 			}
 		});
-		quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		quitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_DOWN_MASK));
 		quitMenuItem.setMnemonic('q');
 		fileMenu.add(quitMenuItem);
 	}
@@ -418,6 +414,7 @@ public class Browser {
 			public MapNode(String name) {
 				tree = new DescriptorNode(name);
 			}
+			@SuppressWarnings("unused")
 			public boolean isLeaf() {
 				return map == null;
 			}
@@ -434,6 +431,7 @@ public class Browser {
 					return child;
 				}
 			}
+			@SuppressWarnings("unused")
 			public void removeChild(String key) {
 				MapNode child = map.remove(key);
 				if (child != null) {

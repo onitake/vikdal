@@ -12,11 +12,6 @@ import ch.seto.vikdal.dalvik.pseudo.*;
 import ch.seto.vikdal.java.*;
 import ch.seto.vikdal.java.code.Block;
 import ch.seto.vikdal.java.code.Method;
-import ch.seto.vikdal.java.code.Statement;
-import japa.parser.ast.Node;
-import japa.parser.ast.body.ClassOrInterfaceDeclaration;
-import japa.parser.ast.body.MethodDeclaration;
-import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class CodeGraphGenerator {
 	
