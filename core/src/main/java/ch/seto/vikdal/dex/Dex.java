@@ -23,16 +23,16 @@ import ch.seto.vikdal.java.TryDescriptor;
 
 public class Dex implements SymbolTable {
 	
-	private final byte[] DEX_FILE_MAGIC = { 0x64, 0x65, 0x78, 0x0a };
-	private final byte[] DEX_FILE_VERSION_009 = { 0x30, 0x30, 0x39, 0x00 };
-	private final byte[] DEX_FILE_VERSION_013 = { 0x30, 0x31, 0x33, 0x00 };
-	private final byte[] DEX_FILE_VERSION_035 = { 0x30, 0x33, 0x35, 0x00 };
-	private final byte[] DEX_FILE_VERSION_037 = { 0x30, 0x33, 0x37, 0x00 };
-	private final byte[] DEX_FILE_VERSION_038 = { 0x30, 0x33, 0x38, 0x00 };
-	private final long ENDIAN_CONSTANT = 0x12345678L;
-	private final long REVERSE_ENDIAN_CONSTANT = 0x78563412L;
-	private final long NO_INDEX = 0xffffffffL;
-	private final int HEADER_SIZE = 0x70;
+	private final static byte[] DEX_FILE_MAGIC = { 0x64, 0x65, 0x78, 0x0a };
+	private final static byte[] DEX_FILE_VERSION_009 = { 0x30, 0x30, 0x39, 0x00 };
+	private final static byte[] DEX_FILE_VERSION_013 = { 0x30, 0x31, 0x33, 0x00 };
+	private final static byte[] DEX_FILE_VERSION_035 = { 0x30, 0x33, 0x35, 0x00 };
+	private final static byte[] DEX_FILE_VERSION_037 = { 0x30, 0x33, 0x37, 0x00 };
+	private final static byte[] DEX_FILE_VERSION_038 = { 0x30, 0x33, 0x38, 0x00 };
+	private final static long ENDIAN_CONSTANT = 0x12345678L;
+	private final static long REVERSE_ENDIAN_CONSTANT = 0x78563412L;
+	private final static long NO_INDEX = 0xffffffffL;
+	private final static int HEADER_SIZE = 0x70;
 
 	private static final class Mapping {
 		public long offset;
