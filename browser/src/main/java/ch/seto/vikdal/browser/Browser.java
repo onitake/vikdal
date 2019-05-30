@@ -47,7 +47,9 @@ import javax.swing.border.BevelBorder;
 // Ex.: java.lang.String.MANUFACTURER instead of
 // java.lang.String android.os.Build.MANUFACTURER
 public class Browser {
-	
+	// if true, load a test file from a fixed location
+	private static final boolean LOAD_DEBUG = false;
+
 	private Dex dex;
 	private List<ClassDescriptor> classList;
 
@@ -89,16 +91,17 @@ public class Browser {
 	public Browser() {
 		classList = new ArrayList<ClassDescriptor>();
 		initialize();
-		// DEBUG try to load a local classes.dex, ignore if non-existent
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					load(new File(getClass().getResource("/classes.dex").toURI()));
-				} catch (URISyntaxException e) {
-				} catch (NullPointerException e) {
+		if (LOAD_DEBUG) {
+			// DEBUG try to load a local classes.dex, ignore if non-existent
+			EventQueue.invokeLater(new Runnable() {
+				public void run() {
+					try {
+						//load(new File(getClass().getResource("/classes.dex").toURI()));
+						load(new File("/tmp/app.apk"));
+					} catch (Exception e) { }
 				}
-			}
-		});
+			});
+		}
 	}
 
 	/**
