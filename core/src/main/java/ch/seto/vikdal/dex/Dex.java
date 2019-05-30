@@ -2,6 +2,7 @@ package ch.seto.vikdal.dex;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
@@ -22,7 +23,12 @@ import ch.seto.vikdal.java.TryDescriptor;
 
 public class Dex implements SymbolTable {
 	
-	private final byte[] DEX_FILE_MAGIC = { 0x64, 0x65, 0x78, 0x0a, 0x30, 0x33, 0x35, 0x00 };
+	private final byte[] DEX_FILE_MAGIC = { 0x64, 0x65, 0x78, 0x0a };
+	private final byte[] DEX_FILE_VERSION_009 = { 0x30, 0x30, 0x39, 0x00 };
+	private final byte[] DEX_FILE_VERSION_013 = { 0x30, 0x31, 0x33, 0x00 };
+	private final byte[] DEX_FILE_VERSION_035 = { 0x30, 0x33, 0x35, 0x00 };
+	private final byte[] DEX_FILE_VERSION_037 = { 0x30, 0x33, 0x37, 0x00 };
+	private final byte[] DEX_FILE_VERSION_038 = { 0x30, 0x33, 0x38, 0x00 };
 	private final long ENDIAN_CONSTANT = 0x12345678L;
 	private final long REVERSE_ENDIAN_CONSTANT = 0x78563412L;
 	private final long NO_INDEX = 0xffffffffL;
@@ -176,6 +182,7 @@ public class Dex implements SymbolTable {
 	private long header_size;
 	private long endian_tag;
 	private List<String> string_table;
+	private int fileVersion;
 	
 	/**
 	 * Initializes the dex parser for reading from file, but doesn't parse the contents yet.
@@ -338,10 +345,30 @@ public class Dex implements SymbolTable {
 		}
 	}
 
-		byte[] magic = new byte[8];
 	private void parseHeader() throws IOException, DexFormatException {
+		byte[] magic = new byte[4];
 		reader.read(magic);
-		if (!Arrays.equals(magic, DEX_FILE_MAGIC)) throw new DexFormatException("Invalid magic");
+		if (validate) {
+			if (!Arrays.equals(magic, DEX_FILE_MAGIC)) throw new DexFormatException("Invalid magic");
+		}
+		byte[] version = new byte[4];
+		reader.read(version);
+		if (Arrays.equals(version, DEX_FILE_VERSION_009)) {
+			fileVersion = 9;
+		} else if (Arrays.equals(version, DEX_FILE_VERSION_013)) {
+			fileVersion = 13;
+		} else if (Arrays.equals(version, DEX_FILE_VERSION_035)) {
+			fileVersion = 35;
+		} else if (Arrays.equals(version, DEX_FILE_VERSION_037)) {
+			fileVersion = 37;
+		} else if (Arrays.equals(version, DEX_FILE_VERSION_038)) {
+			fileVersion = 38;
+		} else {
+			fileVersion = -1;
+			if (validate) {
+				throw new DexFormatException("Unknown file version " + new String(version, 0, 3, Charset.forName("US-ASCII")));
+			}
+		}
 		
 		long checksum = reader.readLEUnsignedInt();
 		byte[] signature = new byte[20];
