@@ -9,19 +9,30 @@ work yet.
 
 ## Build
 
-Compile all Java sources in src/ and test/ .
+The project is split into a core library and code graph browser.
 
-You need the JgraphT, JGraphX, AntLR and JavaParser libraries.
+Both can be built with Maven:
 
-A Maven build file is provided, but JGraphX is missing because upstream does
-not upload builds to Maven Central. The .jar must be obtained elsewhere.
+```
+mvn package
+```
+
+This will produce .jar files in `core/target` and `browser/target`.
+Unfortunately, the JGraphX dependency used by the browser is not actively
+maintained and not available on Maven Central. Version 2.1.0.7 is included
+with vikdal and will be compiled into the standalone jar automatically.
+
+Possible replacements are being investigated.
 
 ## Run
 
-There are a few example applications in test/ .
+The browser can then be run with:
 
-To get started, run ch.seto.vikdal.browser.Browser - this is a graphical code
-browser that nicely visualises code graphs of individual functions.
+```
+java -jar browser/target/vikdal-browser-0.0.1-jar-with-dependencies.jar
+```
+
+Aside from unit tests, there are also some examples in `core/test/java`.
 
 ## License and Copyright
 
@@ -29,9 +40,13 @@ vikdal is copyright © 2014-2019 by Gregor Riepl.
 
 vikdal is released under the GNU General Public License (GPL) version 3.
 
-The file test/org/jgrapht/ext/JGraphXAdapter.java is released under the
+The file `browser/src/main/java/org/jgrapht/ext/JGraphXAdapter.java` is released under the
 GNU Lesser General Public License (LGPL) version 2.1 and is copyright
 2013 by JeanYves Tinevez.
 
-The icons in test/imaes are released under the Apache 2.0 license and copyright
-2017-2018 by The Apache Software Foundation.
+The icons in `browser/src/main/resources/images` are released under the Apache 2.0 license and copyright
+2017-2018 by The Apache Software Foundation. They were taken from the Netbeans IDE.
+
+The JGraphX library in `browser/lib/repo/com/mxgraph/jgraphx/2.1.0.7/jgraphx-2.1.0.7.jar`
+is copyright 2006-2009 Gaudenz Alder and 2008-2009 JGraph Ltd and released
+under the GNU Lesser General Public License (LGPL) version 2.1.
