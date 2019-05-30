@@ -37,14 +37,24 @@ public class FillArrayData extends AbstractInstruction {
 	}
 	
 	@Override
+	public boolean hasBranches() {
+		return true;
+	}
+	
+	@Override
+	public int[] getBranches() {
+		return new int[] { table };
+	}
+	
+	@Override
 	public String toString() {
-		return "v" + vA + " = ARRAY_TABLE(" + table + ")";
+		return "v" + vA + " = ARRAY_TABLE(" + (table >= 0 ? "+" : "") + table + ")";
 	}
 
 	@Override
 	public String toString(SymbolTable symbols, StateTracker tracker) {
 		tracker.setRegisterType(vA, Type.ARRAY);
-		return tracker.getRegisterName(vA) + " = ARRAY_TABLE(" + table + ")";
+		return tracker.getRegisterName(vA) + " = ARRAY_TABLE(" + (table >= 0 ? "+" : "") + table + ")";
 	}
 
 }

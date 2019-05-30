@@ -67,34 +67,44 @@ public class CodeGraphGenerator {
 				} else {
 					offset = 0;
 				}
-				// ignore switch payloads, they are handled by the switch instructions themselves
-				if (!(node.getInstruction() instanceof PackedSwitchPayload || node.getInstruction() instanceof SparseSwitchPayload)) {
+				// ignore payloads, they are handled by the corresponding instructions themselves
+				if (!(
+					node.getInstruction() instanceof PackedSwitchPayload ||
+					node.getInstruction() instanceof SparseSwitchPayload ||
+					node.getInstruction() instanceof FillArrayDataPayload
+				)) {
 					for (int branch : node.getInstruction().getBranches()) {
 						branch += offset;
 						GraphNode target = nodes.get(branch);
 						if (target == null) {
 							throw new ProgramVerificationException("Invalid branch target " + branch);
 						}
-						try {
-							graph.addEdge(node, target).setTag(EdgeTag.GOTO);
-						} catch (IllegalArgumentException e) {
-							throw new ProgramVerificationException(e);
-						}
-					}
-					if (node.getInstruction() instanceof Switch) {
-						GraphNode cases = nodes.get(node.getInstruction().getBranches()[0] + offset);
-						if (cases.getInstruction().hasBranches()) {
-							for (int branch : cases.getInstruction().getBranches()) {
-								branch += offset;
-								GraphNode target = nodes.get(branch);
-								if (target == null) {
-									throw new ProgramVerificationException("Invalid branch target " + branch);
+						if (node.getInstruction() instanceof Switch) {
+							if (target.getInstruction().hasBranches()) {
+								for (int sbranch : target.getInstruction().getBranches()) {
+									sbranch += offset;
+									GraphNode starget = nodes.get(sbranch);
+									if (starget == null) {
+										throw new ProgramVerificationException("Invalid branch target " + sbranch);
+									}
+									try {
+										graph.addEdge(node, starget).setTag(EdgeTag.CASE);
+									} catch (IllegalArgumentException e) {
+										throw new ProgramVerificationException(e);
+									}
 								}
-								try {
-									graph.addEdge(node, target).setTag(EdgeTag.CASE);
-								} catch (IllegalArgumentException e) {
-									throw new ProgramVerificationException(e);
-								}
+							}
+						} else if (node.getInstruction() instanceof FillArrayData) {
+							try {
+								graph.addEdge(node, target).setTag(EdgeTag.DATA);
+							} catch (IllegalArgumentException e) {
+								throw new ProgramVerificationException(e);
+							}
+						} else {
+							try {
+								graph.addEdge(node, target).setTag(EdgeTag.GOTO);
+							} catch (IllegalArgumentException e) {
+								throw new ProgramVerificationException(e);
 							}
 						}
 					}

@@ -8,6 +8,7 @@ public enum EdgeTag {
 	GOTO("goto"),
 	ENTRY("entry"),
 	CASE("case"),
+	DATA("data"),
 	;
 	
 	private String description;

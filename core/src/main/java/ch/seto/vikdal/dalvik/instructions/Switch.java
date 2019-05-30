@@ -63,18 +63,18 @@ public class Switch extends AbstractInstruction {
 	@Override
 	public String toString() {
 		if (operation == Operation.packed_switch) {
-			return "switch (v" + vA + ") PACKED_TABLE(" + table + ")";
+			return "switch (v" + vA + ") PACKED_TABLE(" + (table >= 0 ? "+" : "") + table + ")";
 		} else {
-			return "switch (v" + vA + ") SPARSE_TABLE(" + table + ")";
+			return "switch (v" + vA + ") SPARSE_TABLE(" + (table >= 0 ? "+" : "") + table + ")";
 		}
 	}
 	
 	@Override
-	public String toString(SymbolTable table, StateTracker tracker) {
+	public String toString(SymbolTable stable, StateTracker tracker) {
 		if (operation == Operation.packed_switch) {
-			return "switch (" + tracker.getRegisterName(vA) + ") PACKED_TABLE(" + table + ")";
+			return "switch (" + tracker.getRegisterName(vA) + ") PACKED_TABLE(" + (table >= 0 ? "+" : "") + table + ")";
 		} else {
-			return "switch (" + tracker.getRegisterName(vA) + ") SPARSE_TABLE(" + table + ")";
+			return "switch (" + tracker.getRegisterName(vA) + ") SPARSE_TABLE(" + (table >= 0 ? "+" : "") + table + ")";
 		}
 	}
 
