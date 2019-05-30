@@ -26,6 +26,7 @@ public class Dex implements SymbolTable {
 	private final long ENDIAN_CONSTANT = 0x12345678L;
 	private final long REVERSE_ENDIAN_CONSTANT = 0x78563412L;
 	private final long NO_INDEX = 0xffffffffL;
+	private final int HEADER_SIZE = 0x70;
 
 	private static final class Mapping {
 		public long offset;
@@ -146,6 +147,7 @@ public class Dex implements SymbolTable {
 	}
 	
 	private Set<ProgressListener> listeners;
+	private boolean validate;
 	private File dexfile;
 	private byte[] dexdata;
 	private boolean parsed;
@@ -256,6 +258,20 @@ public class Dex implements SymbolTable {
 	}
 	
 	/**
+	 * Returns whether file validation is enabled.
+	 */
+	public boolean getValidate() {
+		return validate;
+	}
+
+	/**
+	 * Enables or disables file validation.
+	 */
+	public void setValidate(boolean validate) {
+		this.validate = validate;
+	}
+
+	/**
 	 * Starts the parsing process. Progress updates will be sent to the attached listeners periodically.
 	 * @throws IOException if the DEX file can't be read or some other form of I/O error occured
 	 * @throws DexFormatException if the DEX file can't be parsed correctly
@@ -274,7 +290,7 @@ public class Dex implements SymbolTable {
 		}
 		try {
 			updateProgress(progr += step);
-			parseHeader(true);
+			parseHeader();
 			updateProgress(progr += step);
 			parseStringIds();
 			updateProgress(progr += step);
@@ -322,8 +338,8 @@ public class Dex implements SymbolTable {
 		}
 	}
 
-	private void parseHeader(boolean check) throws IOException, DexFormatException {
 		byte[] magic = new byte[8];
+	private void parseHeader() throws IOException, DexFormatException {
 		reader.read(magic);
 		if (!Arrays.equals(magic, DEX_FILE_MAGIC)) throw new DexFormatException("Invalid magic");
 		
@@ -349,7 +365,7 @@ public class Dex implements SymbolTable {
 			}
 			available -= len;
 		}
-		if (check) {
+		if (validate) {
 			if (adler32.getValue() != checksum) throw new DexFormatException("Invalid Adler32 checksum");
 			if (!Arrays.equals(sha1.digest(), signature)) throw new DexFormatException("Invalid SHA1 checksum");
 		}
@@ -357,13 +373,23 @@ public class Dex implements SymbolTable {
 		reader.seek(headerPos);
 
 		file_size = reader.readLEUnsignedInt();
+		if (validate) {
+			if (file_size != reader.length()) {
+				throw new DexFormatException("File size field mismatch");
+			}
+		}
 		header_size = reader.readLEUnsignedInt();
+		if (validate) {
+			if (header_size != HEADER_SIZE) {
+				throw new DexFormatException("Invalid header size");
+			}
+		}
 		endian_tag = reader.readLEUnsignedInt();
 		if (endian_tag == REVERSE_ENDIAN_CONSTANT) {
 			System.out.println("Endianness reversed, turning on conversion");
 			reader.setBigEndian(true);
 		} else if (endian_tag != ENDIAN_CONSTANT) {
-			throw new DexFormatException("Invalid endiannes tag");
+			throw new DexFormatException("Invalid endianness tag");
 		}
 		link = new Mapping(reader.readUnsignedInt(), reader.readUnsignedInt());
 		map = new Mapping(reader.readUnsignedInt());
