@@ -56,32 +56,34 @@ public class CodeGraphGenerator {
 			previous = node;
 		}
 		for (GraphNode node : graph.vertexSet()) {
-			if (node.getInstruction().hasBranches()) {
+			Instruction instruction = node.getInstruction();
+			if (instruction.hasBranches()) {
 				// all other edges are branch targets
-				if (node.getInstruction().getBranches().length == 0) {
+				if (instruction.getBranches().length == 0) {
 					throw new ProgramVerificationException("A branching instruction must not have 0 branch targets");
 				}
 				int offset;
-				if (node.getInstruction().areBranchesRelative()) {
+				if (instruction.areBranchesRelative()) {
 					offset = node.getAddress();
 				} else {
 					offset = 0;
 				}
 				// ignore payloads, they are handled by the corresponding instructions themselves
 				if (!(
-					node.getInstruction() instanceof PackedSwitchPayload ||
-					node.getInstruction() instanceof SparseSwitchPayload ||
-					node.getInstruction() instanceof FillArrayDataPayload
+					instruction instanceof PackedSwitchPayload ||
+					instruction instanceof SparseSwitchPayload ||
+					instruction instanceof FillArrayDataPayload
 				)) {
-					for (int branch : node.getInstruction().getBranches()) {
+					for (int branch : instruction.getBranches()) {
 						branch += offset;
 						GraphNode target = nodes.get(branch);
 						if (target == null) {
 							throw new ProgramVerificationException("Invalid branch target " + branch);
 						}
-						if (node.getInstruction() instanceof Switch) {
-							if (target.getInstruction().hasBranches()) {
-								for (int sbranch : target.getInstruction().getBranches()) {
+						if (instruction instanceof Switch) {
+							Instruction tinstruction = target.getInstruction();
+							if (tinstruction.hasBranches()) {
+								for (int sbranch : tinstruction.getBranches()) {
 									sbranch += offset;
 									GraphNode starget = nodes.get(sbranch);
 									if (starget == null) {
@@ -94,7 +96,7 @@ public class CodeGraphGenerator {
 									}
 								}
 							}
-						} else if (node.getInstruction() instanceof FillArrayData) {
+						} else if (instruction instanceof FillArrayData) {
 							try {
 								graph.addEdge(node, target).setTag(EdgeTag.DATA);
 							} catch (IllegalArgumentException e) {
