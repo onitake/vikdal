@@ -1,8 +1,9 @@
 package ch.seto.vikdal.java.transformers;
 
-import org.jgrapht.DirectedGraph;
+//import org.jgrapht.DirectedGraph;
 
 import ch.seto.vikdal.java.ClassMethodDescriptor;
+import edu.uci.ics.jung.graph.DirectedGraph;
 
 public class Function {
 	public final ClassMethodDescriptor descriptor;

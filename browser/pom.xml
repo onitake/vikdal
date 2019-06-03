@@ -75,5 +75,15 @@
   		<artifactId>jgraphx</artifactId>
   		<version>2.1.0.7</version>
   	</dependency>
+    <dependency>
+      <groupId>net.sf.jung</groupId>
+      <artifactId>jung-algorithms</artifactId>
+      <version>2.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>net.sf.jung</groupId>
+      <artifactId>jung-visualization</artifactId>
+      <version>2.1.1</version>
+    </dependency>
   </dependencies>
 </project>

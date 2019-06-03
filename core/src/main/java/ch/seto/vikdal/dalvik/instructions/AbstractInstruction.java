@@ -6,7 +6,7 @@ import ch.seto.vikdal.dalvik.Instructions;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
 
-abstract class AbstractInstruction implements Instruction {
+public abstract class AbstractInstruction implements Instruction {
 	
 	@Override
 	public int getInstructionSize() {

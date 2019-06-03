@@ -27,16 +27,31 @@ import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.GraphEdge;
 import ch.seto.vikdal.java.transformers.GraphNode;
 import ch.seto.vikdal.java.transformers.ProgramVerificationException;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.visualization.DefaultVisualizationModel;
+import edu.uci.ics.jung.visualization.RenderContext;
+import edu.uci.ics.jung.visualization.VisualizationModel;
+import edu.uci.ics.jung.visualization.VisualizationServer;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import edu.uci.ics.jung.visualization.renderers.DefaultVertexLabelRenderer;
+import edu.uci.ics.jung.visualization.renderers.GradientVertexRenderer;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
+import edu.uci.ics.jung.visualization.renderers.VertexLabelAsShapeRenderer;
 
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
+//import com.mxgraph.layout.mxGraphLayout;
+//import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+//import com.mxgraph.swing.mxGraphComponent;
+//import com.mxgraph.view.mxGraph;
 
-import org.jgrapht.ext.JGraphXAdapter;
+//import org.jgrapht.ext.JGraphXAdapter;
 
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
 
 // TODO Static value lookups return the type of the
 // value, not the containing class. Fix that!
@@ -44,18 +59,21 @@ import javax.swing.border.BevelBorder;
 // java.lang.String android.os.Build.MANUFACTURER
 public class Browser {
 	// if true, load a test file from a fixed location
-	private static final boolean LOAD_DEBUG = false;
+	private static final boolean LOAD_DEBUG = true;
 
 	private Dex dex;
 	private List<ClassDescriptor> classList;
 
 	private JFrame frame;
-	private mxGraphComponent graphComponent;
+	//private mxGraphComponent graphComponent;
+	private VisualizationViewer<GraphNode, GraphEdge> graphViewer;
 	private JMenuBar menuBar;
 	private JLabel statusBarLabel;
 	private JProgressBar progressBar;
 	private JTree classTree;
 	private JLabel objectDescription;
+
+	private VisualizationModel<GraphNode, GraphEdge> graphModel;
 
 	/**
 	 * Launch the application.
@@ -152,8 +170,28 @@ public class Browser {
 		contentLayout.putConstraint(SpringLayout.EAST, objectDescription, 6, SpringLayout.EAST, frame.getContentPane());
 		frame.getContentPane().add(objectDescription);
 		
-		graphComponent = new mxGraphComponent(new mxGraph());
-		graphComponent.setConnectable(false);
+		Layout<GraphNode, GraphEdge> graphLayout = new FRLayout<>(new DirectedSparseGraph<GraphNode, GraphEdge>());
+		graphModel = new DefaultVisualizationModel<>(graphLayout);
+		graphViewer = new VisualizationViewer<>(graphModel);
+//		graphComponent = new mxGraphComponent(new mxGraph());
+//		graphComponent.setConnectable(false);
+	    RenderContext<GraphNode, GraphEdge> renderContext = graphViewer.getRenderContext();
+	    VertexLabelAsShapeRenderer<GraphNode, GraphEdge> shaper = new VertexLabelAsShapeRenderer<>(renderContext);
+	    Renderer<GraphNode, GraphEdge> renderer = graphViewer.getRenderer();
+	    renderer.setVertexLabelRenderer(shaper);
+	    renderer.setVertexRenderer(new GradientVertexRenderer<GraphNode, GraphEdge>(new Color(255, 127, 127, 255), new Color(255, 0, 0, 255), false));
+	    renderContext.setEdgeLabelTransformer(new ToStringLabeller());
+	    renderContext.setVertexLabelTransformer(new ToStringLabeller());
+	    renderContext.setVertexShapeTransformer(shaper);
+	    renderContext.setVertexLabelRenderer(new DefaultVertexLabelRenderer(new Color(127, 127, 255, 255)) {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public <V> Component getVertexLabelRendererComponent(JComponent vv, Object value, Font font, boolean isSelected, V vertex) {
+				JLabel c = (JLabel) super.getVertexLabelRendererComponent(vv, value, font, isSelected, vertex);
+				c.setBorder(new EmptyBorder(10, 10, 10, 10));
+				return c;
+			}
+		});
 
 		JSplitPane splitPane = new JSplitPane();
 		contentLayout.putConstraint(SpringLayout.NORTH, splitPane, 26, SpringLayout.NORTH, frame.getContentPane());
@@ -161,7 +199,8 @@ public class Browser {
 		contentLayout.putConstraint(SpringLayout.EAST, splitPane, -6, SpringLayout.EAST, frame.getContentPane());
 		frame.getContentPane().add(splitPane);
 		splitPane.setLeftComponent(classScrollPane);
-		splitPane.setRightComponent(graphComponent);
+//		splitPane.setRightComponent(graphComponent);
+		splitPane.setRightComponent(graphViewer);
 		splitPane.setResizeWeight(0);
 		splitPane.setDividerLocation(300);
 		
@@ -248,17 +287,20 @@ public class Browser {
 	protected void displayMethod(ClassMethodDescriptor method) {
 		CodeGraphGenerator generator = new CodeGraphGenerator(dex);
 
-		mxGraph graph = new mxGraph();
+		DirectedGraph<GraphNode, GraphEdge> graph = new DirectedSparseGraph<>();
+//		mxGraph graph = new mxGraph();
 		if (method != null) {
 			SortedMap<Integer, Instruction> code = dex.getCode(method.methodid);
 			if (code != null) {
 				try {
 					Function fn = generator.symbolicate(generator.transformToPseudoCode(code, method));
-					graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
-			
-					graph.setCellsDeletable(false);
-					graph.setCellsDisconnectable(false);
-					graph.setCellsEditable(false);
+					
+					graph = fn.code;
+//					graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
+//			
+//					graph.setCellsDeletable(false);
+//					graph.setCellsDisconnectable(false);
+//					graph.setCellsEditable(false);
 					
 					// Turn all edges into curves
 					// Doesn't work very well, messes up the arrows
@@ -266,8 +308,8 @@ public class Browser {
 					styles.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
 					graph.getStylesheet().setDefaultEdgeStyle(styles);*/
 			
-					mxGraphLayout layout = new mxHierarchicalLayout(graph);
-					layout.execute(graph.getDefaultParent());
+//					mxGraphLayout layout = new mxHierarchicalLayout(graph);
+//					layout.execute(graph.getDefaultParent());
 				
 					statusBarLabel.setText("Showing method " + method.name);
 				} catch (ProgramVerificationException e) {
@@ -279,8 +321,14 @@ public class Browser {
 		} else {
 			statusBarLabel.setText("No method definition found");
 		}
-		graphComponent.setGraph(graph);
-		graphComponent.refresh();
+//		graphComponent.setGraph(graph);
+//		graphComponent.refresh();
+
+//		Layout<GraphNode, GraphEdge> graphLayout = new FRLayout<>(graph);
+//		graphModel = new DefaultVisualizationModel<>(graphLayout);
+//		graphViewer.setGraphLayout(graphLayout);
+		graphModel.getGraphLayout().setGraph(graph);
+//		graphModel.fireStateChanged();
 	}
 	
 	/**

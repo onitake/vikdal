@@ -2,9 +2,9 @@ package ch.seto.vikdal.java.transformers;
 
 import java.util.*;
 
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DirectedMultigraph;
-import org.jgrapht.traverse.DepthFirstIterator;
+//import org.jgrapht.DirectedGraph;
+//import org.jgrapht.graph.DirectedMultigraph;
+//import org.jgrapht.traverse.DepthFirstIterator;
 
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.instructions.*;
@@ -12,6 +12,8 @@ import ch.seto.vikdal.dalvik.pseudo.*;
 import ch.seto.vikdal.java.*;
 import ch.seto.vikdal.java.code.Block;
 import ch.seto.vikdal.java.code.Method;
+import edu.uci.ics.jung.graph.DirectedGraph;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
 
 public class CodeGraphGenerator {
 	
@@ -38,7 +40,7 @@ public class CodeGraphGenerator {
 	 */
 	public Function transformToPseudoCode(SortedMap<Integer, Instruction> code, ClassMethodDescriptor method) throws ProgramVerificationException {
 		// generate a code graph from the instruction list
-		DirectedGraph<GraphNode, GraphEdge> graph = new DirectedMultigraph<GraphNode, GraphEdge>(GraphEdge.FACTORY);
+		DirectedGraph<GraphNode, GraphEdge> graph = new DirectedSparseGraph<GraphNode, GraphEdge>();
 		Map<Integer, GraphNode> nodes = new LinkedHashMap<Integer, GraphNode>();
 		GraphNode previous = null;
 		for (Map.Entry<Integer, Instruction> entry : code.entrySet()) {
@@ -46,11 +48,11 @@ public class CodeGraphGenerator {
 			graph.addVertex(node);
 			nodes.put(node.getAddress(), node);
 			if (previous != null) {
-				graph.addEdge(previous, node);
+				graph.addEdge(new GraphEdge(previous, node), previous, node);
 			}
 			previous = node;
 		}
-		for (GraphNode node : graph.vertexSet()) {
+		for (GraphNode node : graph.getVertices()) {
 			Instruction instruction = node.getInstruction();
 			if (instruction.hasBranches()) {
 				// all other edges are branch targets
@@ -85,7 +87,7 @@ public class CodeGraphGenerator {
 										throw new ProgramVerificationException("Invalid branch target " + sbranch);
 									}
 									try {
-										graph.addEdge(node, starget).setTag(EdgeTag.CASE);
+										graph.addEdge(new GraphEdge(node, starget, EdgeTag.CASE), node, starget);
 									} catch (IllegalArgumentException e) {
 										throw new ProgramVerificationException(e);
 									}
@@ -93,13 +95,13 @@ public class CodeGraphGenerator {
 							}
 						} else if (instruction instanceof FillArrayData) {
 							try {
-								graph.addEdge(node, target).setTag(EdgeTag.DATA);
+								graph.addEdge(new GraphEdge(node, target, EdgeTag.DATA), node, target);
 							} catch (IllegalArgumentException e) {
 								throw new ProgramVerificationException(e);
 							}
 						} else {
 							try {
-								graph.addEdge(node, target).setTag(EdgeTag.GOTO);
+								graph.addEdge(new GraphEdge(node, target, EdgeTag.GOTO), node, target);
 							} catch (IllegalArgumentException e) {
 								throw new ProgramVerificationException(e);
 							}
@@ -116,14 +118,14 @@ public class CodeGraphGenerator {
 		Set<GraphNode> returnVertices = new HashSet<GraphNode>();
 		Set<GraphEdge> deadEdges = new LinkedHashSet<GraphEdge>();
 		Map<Integer, GraphNode> vertexMap = new HashMap<Integer, GraphNode>();
-		for (GraphNode node : graph.vertexSet()) {
+		for (GraphNode node : graph.getVertices()) {
 			// eliminate all edges after a return or throw
 			if (node.getInstruction() instanceof Return || node.getInstruction() instanceof ReturnVoid || node.getInstruction() instanceof Throw) {
-				deadEdges.addAll(graph.outgoingEdgesOf(node));
+				deadEdges.addAll(graph.getOutEdges(node));
 			}
 			// eliminate edges from goto instructions that are not branches
 			if (node.getInstruction() instanceof Goto) {
-				deadEdges.addAll(GraphEdge.edgesWithoutTag(graph.outgoingEdgesOf(node), EdgeTag.GOTO));
+				deadEdges.addAll(GraphEdge.edgesWithoutTag(graph.getOutEdges(node), EdgeTag.GOTO));
 			}
 			
 			// add vertex to search map
@@ -142,7 +144,9 @@ public class CodeGraphGenerator {
 		}
 		
 		// eliminate dead edges
-		graph.removeAllEdges(deadEdges);
+		for (GraphEdge edge : deadEdges) {
+			graph.removeEdge(edge);
+		}
 		
 		// verify the graph
 		if (entryVertex == null) {
@@ -168,7 +172,7 @@ public class CodeGraphGenerator {
 		}
 		GraphNode headerVertex = new GraphNode(-1, new Entry(method.returntype, method.name, method.registers - method.inputs, method.inputs, parameters));
 		graph.addVertex(headerVertex);
-		graph.addEdge(headerVertex, entryVertex).setTag(EdgeTag.ENTRY);
+		graph.addEdge(new GraphEdge(headerVertex, entryVertex, EdgeTag.ENTRY), headerVertex, entryVertex);
 		
 		// order try-catch blocks by address, and inside-out
 		List<TryDescriptor> exceptions = new ArrayList<TryDescriptor>(method.exceptions);
@@ -199,24 +203,26 @@ public class CodeGraphGenerator {
 				graph.addVertex(trynode);
 				graph.addVertex(catnode);
 				// copy the edge lists to avoid concurrent modifications
-				for (GraphEdge inedge : new ArrayList<GraphEdge>(graph.incomingEdgesOf(start))) {
+				for (GraphEdge inedge : new ArrayList<GraphEdge>(graph.getInEdges(start))) {
 					GraphNode source = inedge.source;
 					graph.removeEdge(inedge);
-					graph.addEdge(source, trynode).setTag(inedge.getTag());
+					graph.addEdge(new GraphEdge(source, trynode, inedge.getTag()), source, trynode);
 				}
-				graph.addEdge(trynode, start);
-				for (GraphEdge inedge : new ArrayList<GraphEdge>(graph.incomingEdgesOf(end))) {
+				graph.addEdge(new GraphEdge(trynode, start), trynode, start);
+				for (GraphEdge inedge : new ArrayList<GraphEdge>(graph.getInEdges(end))) {
 					GraphNode source = inedge.source;
 					graph.removeEdge(inedge);
-					graph.addEdge(source, catnode).setTag(inedge.getTag());
+					graph.addEdge(new GraphEdge(source, catnode, inedge.getTag()), source, catnode);
 				}
-				graph.addEdge(catnode, end);
-				graph.addEdge(trynode, catnode).setTag(EdgeTag.TRYCATCH);
+				graph.addEdge(new GraphEdge(catnode, end), catnode, end);
+				graph.addEdge(new GraphEdge(trynode, catnode, EdgeTag.TRYCATCH), trynode, catnode);
 				for (int target : catches) {
-					graph.addEdge(catnode, vertexMap.get(target)).setTag(EdgeTag.CATCH);
+					GraphNode targetnode = vertexMap.get(target);
+					graph.addEdge(new GraphEdge(catnode, targetnode, EdgeTag.CATCH), catnode, targetnode);
 				}
 				if (ex.catchall != -1) {
-					graph.addEdge(catnode, vertexMap.get(ex.catchall)).setTag(EdgeTag.CATCHALL);
+					GraphNode exnode = vertexMap.get(ex.catchall);
+					graph.addEdge(new GraphEdge(catnode, exnode, EdgeTag.CATCHALL), catnode, exnode);
 				}
 				// update vertex map with try node, so subsequent try-catch blocks get inserted before
 				vertexMap.put(ex.start, trynode);
@@ -262,10 +268,12 @@ public class CodeGraphGenerator {
 		Function mod = fn.clone();
 		
 		// do a DFS traversal, dropping descriptions on all nodes
-		DepthFirstIterator<GraphNode, GraphEdge> iterator = new DepthFirstIterator<GraphNode, GraphEdge>(mod.code, mod.headerVertex);
+		DepthFirstTraversal<GraphNode, GraphEdge> dfs = new DepthFirstTraversal<>(mod.code);
+//		DepthFirstIterator<GraphNode, GraphEdge> iterator = new DepthFirstIterator<GraphNode, GraphEdge>(mod.code, mod.headerVertex);
 		GraphSymbolicator symbolicator = new GraphSymbolicator(table, tracker);
-		iterator.addTraversalListener(symbolicator);
-		for (; iterator.hasNext(); iterator.next());
+//		iterator.addTraversalListener(symbolicator);
+		dfs.traverse(symbolicator, mod.headerVertex);
+//		for (; iterator.hasNext(); iterator.next());
 		if (!symbolicator.hasSucceeded()) {
 			throw new ProgramVerificationException("Symbolication failed due to register type override");
 		}

@@ -10,47 +10,63 @@ import java.util.List;
 
 import java.awt.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jgrapht.ext.JGraphXAdapter;
+import ch.seto.vikdal.dalvik.Format;
 
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
+//import org.jgrapht.ext.JGraphXAdapter;
+//
+//import com.mxgraph.layout.mxGraphLayout;
+//import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
+//import com.mxgraph.swing.mxGraphComponent;
+//import com.mxgraph.view.mxGraph;
 
 import ch.seto.vikdal.dalvik.Instruction;
+import ch.seto.vikdal.dalvik.instructions.AbstractInstruction;
 import ch.seto.vikdal.dex.Dex;
 import ch.seto.vikdal.dex.DexFormatException;
 import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.ClassMethodDescriptor;
+import ch.seto.vikdal.java.EdgeTag;
 import ch.seto.vikdal.java.MethodDescriptor;
 import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
 import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.GraphEdge;
 import ch.seto.vikdal.java.transformers.GraphNode;
 import ch.seto.vikdal.java.transformers.ProgramVerificationException;
+import edu.uci.ics.jung.algorithms.layout.FRLayout;
+import edu.uci.ics.jung.algorithms.layout.Layout;
+import edu.uci.ics.jung.graph.DirectedSparseGraph;
+import edu.uci.ics.jung.visualization.DefaultVisualizationModel;
+import edu.uci.ics.jung.visualization.RenderContext;
+import edu.uci.ics.jung.visualization.VisualizationModel;
+import edu.uci.ics.jung.visualization.VisualizationViewer;
+import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
+import edu.uci.ics.jung.visualization.renderers.DefaultVertexLabelRenderer;
+import edu.uci.ics.jung.visualization.renderers.GradientVertexRenderer;
+import edu.uci.ics.jung.visualization.renderers.Renderer;
+import edu.uci.ics.jung.visualization.renderers.VertexLabelAsShapeRenderer;
 
 @SuppressWarnings("serial")
 public class GraphTest extends JFrame implements ListSelectionListener {
 
 	public static void main(String[] args) {
-		new GraphTest("/classes.dex").setVisible(true);
+		new GraphTest(new File("/tmp/classes.dex")).setVisible(true);
 	}
 
 	private Dex dex;
-	private mxGraphComponent graphComponent;
+//	private mxGraphComponent graphComponent;
 	private JList<String> methodSelector;
 	private List<ClassMethodDescriptor> methodList;
+	private VisualizationModel<String, String> graphModel;
+	private VisualizationViewer<String, String> graphViewer;
 
-	private GraphTest(String fileName) {
+	private GraphTest(File dexFile) {
 		try {
-			File dexFile = new File(getClass().getResource(fileName).toURI());
 			dex = new Dex(dexFile);
 			dex.parse();
-		} catch (URISyntaxException e) {
-			throw new RuntimeException("Invalid resource URI", e);
 		} catch (IOException e) {
 			throw new RuntimeException("Can't read DEX archive", e);
 		} catch (DexFormatException e) {
@@ -72,10 +88,32 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 	private void init() {
 		Container content = getContentPane();
 
-		graphComponent = new mxGraphComponent(new mxGraph());
-		graphComponent.setConnectable(false);
-		content.add(graphComponent);
-		
+//		graphComponent = new mxGraphComponent(new mxGraph());
+//		graphComponent.setConnectable(false);
+//		content.add(graphComponent);
+		Layout<String, String> graphLayout = new FRLayout<>(testGraph());
+//		Layout<GraphNode, GraphEdge> graphLayout = new FRLayout<>(new DirectedSparseGraph<GraphNode, GraphEdge>());
+		graphModel = new DefaultVisualizationModel<>(graphLayout);
+		graphViewer = new VisualizationViewer<>(graphModel);
+
+	    RenderContext<String, String> renderContext = graphViewer.getRenderContext();
+	    VertexLabelAsShapeRenderer<String, String> shaper = new VertexLabelAsShapeRenderer<>(renderContext);
+	    Renderer<String, String> renderer = graphViewer.getRenderer();
+	    renderer.setVertexLabelRenderer(shaper);
+	    renderer.setVertexRenderer(new GradientVertexRenderer<String, String>(new Color(255, 127, 127, 255), new Color(255, 0, 0, 255), false));
+	    renderContext.setEdgeLabelTransformer(new ToStringLabeller());
+	    renderContext.setVertexLabelTransformer(new ToStringLabeller());
+	    renderContext.setVertexShapeTransformer(shaper);
+	    renderContext.setVertexLabelRenderer(new DefaultVertexLabelRenderer(new Color(127, 127, 255, 255)) {
+			private static final long serialVersionUID = 1L;
+			@Override
+			public <V> Component getVertexLabelRendererComponent(JComponent vv, Object value, Font font, boolean isSelected, V vertex) {
+				JLabel c = (JLabel) super.getVertexLabelRendererComponent(vv, value, font, isSelected, vertex);
+				c.setBorder(new EmptyBorder(10, 10, 10, 10));
+				return c;
+			}
+		});
+
 		JPanel sidebar = new JPanel();
 		methodSelector = new JList<String>();
 		methodSelector.addListSelectionListener(this);
@@ -90,10 +128,14 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 		content.add(sidebar);
 
 		SpringLayout contentLayout = new SpringLayout();
-		contentLayout.putConstraint(SpringLayout.NORTH, graphComponent, 0, SpringLayout.NORTH, content);
-		contentLayout.putConstraint(SpringLayout.WEST, graphComponent, 0, SpringLayout.WEST, content);
-		contentLayout.putConstraint(SpringLayout.SOUTH, graphComponent, 0, SpringLayout.SOUTH, content);
-		contentLayout.putConstraint(SpringLayout.EAST, graphComponent, 0, SpringLayout.WEST, sidebar);
+//		contentLayout.putConstraint(SpringLayout.NORTH, graphComponent, 0, SpringLayout.NORTH, content);
+//		contentLayout.putConstraint(SpringLayout.WEST, graphComponent, 0, SpringLayout.WEST, content);
+//		contentLayout.putConstraint(SpringLayout.SOUTH, graphComponent, 0, SpringLayout.SOUTH, content);
+//		contentLayout.putConstraint(SpringLayout.EAST, graphComponent, 0, SpringLayout.WEST, sidebar);
+		contentLayout.putConstraint(SpringLayout.NORTH, graphViewer, 0, SpringLayout.NORTH, content);
+		contentLayout.putConstraint(SpringLayout.WEST, graphViewer, 0, SpringLayout.WEST, content);
+		contentLayout.putConstraint(SpringLayout.SOUTH, graphViewer, 0, SpringLayout.SOUTH, content);
+		contentLayout.putConstraint(SpringLayout.EAST, graphViewer, 0, SpringLayout.WEST, sidebar);
 		contentLayout.putConstraint(SpringLayout.NORTH, sidebar, 0, SpringLayout.NORTH, content);
 		contentLayout.putConstraint(SpringLayout.SOUTH, sidebar, 0, SpringLayout.SOUTH, content);
 		contentLayout.putConstraint(SpringLayout.EAST, sidebar, 0, SpringLayout.EAST, content);
@@ -113,6 +155,14 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 	}
 	
+	private DirectedSparseGraph<String, String> testGraph() {
+		DirectedSparseGraph<String, String> graph = new DirectedSparseGraph<>();
+		graph.addVertex("A");
+		graph.addVertex("B");
+		graph.addEdge("A -> B", "A", "B");
+		return graph;
+	}
+
 	private void setMethod(int methodIndex) {
 		SortedMap<Integer, Instruction> code = null;
 	
@@ -127,19 +177,20 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 		if (code != null) {
 			try {
 				Function fn = generator.symbolicate(generator.transformToPseudoCode(code, (ClassMethodDescriptor) desc));
-				mxGraph graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
+//				mxGraph graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
 		
-				graph.setCellsDeletable(false);
-				graph.setCellsDisconnectable(false);
-				graph.setCellsEditable(false);
+//				graph.setCellsDeletable(false);
+//				graph.setCellsDisconnectable(false);
+//				graph.setCellsEditable(false);
 				/*Map<String, Object> styles = graph.getStylesheet().getDefaultEdgeStyle();
 				styles.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
 				graph.getStylesheet().setDefaultEdgeStyle(styles);*/
 		
-				mxGraphLayout layout = new mxHierarchicalLayout(graph);
-				layout.execute(graph.getDefaultParent());
+//				mxGraphLayout layout = new mxHierarchicalLayout(graph);
+//				layout.execute(graph.getDefaultParent());
 				
-				graphComponent.setGraph(graph);
+//				graphComponent.setGraph(graph);
+				//graphModel.getGraphLayout().setGraph(fn.code);
 			} catch (ProgramVerificationException e) {
 				e.printStackTrace();
 			}

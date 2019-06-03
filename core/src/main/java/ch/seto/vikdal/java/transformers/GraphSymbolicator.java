@@ -8,7 +8,7 @@ import org.jgrapht.event.VertexTraversalEvent;
 
 import ch.seto.vikdal.java.SymbolTable;
 
-public class GraphSymbolicator extends TraversalListenerAdapter<GraphNode, GraphEdge> {
+public class GraphSymbolicator extends TraversalListenerAdapter<GraphNode, GraphEdge> implements DepthFirstVisitor<GraphNode, GraphEdge> {
 	private Map<GraphNode, StateTracker> stack;
 	private SymbolTable symbols;
 	private StateTracker tracker;
@@ -52,6 +52,40 @@ public class GraphSymbolicator extends TraversalListenerAdapter<GraphNode, Graph
 			node.setDescription(node.getInstruction().toString(symbols, previous));
 		} else {
 			node.setDescription(node.getInstruction().toString(symbols, tracker));
+		}
+	}
+
+	@Override
+	public void visitNode(GraphNode node) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void visitEdge(GraphEdge edge, GraphNode from, GraphNode to) {
+		StateTracker previous = stack.get(to);
+		// check if we have visited this node before
+		if (previous != null) {
+			// verify that no register has changed its type from the previous encounter
+			for (int i = tracker.getLowerRegisterBoundary(); i < tracker.getUpperRegisterBoundary(); i++) {
+				if (tracker.getRegisterType(i) != previous.getRegisterType(i)) {
+					success = false;
+				}
+			}
+		}
+		// add/replace the current tracker state for this node
+		stack.put(to, (StateTracker) tracker.clone());
+	}
+
+	@Override
+	public void visitReturnEdge(GraphEdge edge, GraphNode from, GraphNode to) {
+		// use the initial state tracker instance to symbolicate this node
+		StateTracker previous = stack.get(to);
+		// update the node's description
+		if (previous != null) {
+			to.setDescription(to.getInstruction().toString(symbols, previous));
+		} else {
+			to.setDescription(to.getInstruction().toString(symbols, tracker));
 		}
 	}
 }
