@@ -3,8 +3,6 @@ package ch.seto.vikdal.test;
 import java.io.File;
 import java.io.IOException;
 
-import java.net.URISyntaxException;
-
 import java.util.*;
 import java.util.List;
 
@@ -13,13 +11,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import org.jgrapht.ext.JGraphXAdapter;
-
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
-
+import ch.seto.vikdal.adapter.GraphvizAdapter;
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dex.Dex;
 import ch.seto.vikdal.dex.DexFormatException;
@@ -28,29 +20,27 @@ import ch.seto.vikdal.java.ClassMethodDescriptor;
 import ch.seto.vikdal.java.MethodDescriptor;
 import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
 import ch.seto.vikdal.java.transformers.Function;
-import ch.seto.vikdal.java.transformers.GraphEdge;
-import ch.seto.vikdal.java.transformers.GraphNode;
 import ch.seto.vikdal.java.transformers.ProgramVerificationException;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
 
 @SuppressWarnings("serial")
 public class GraphTest extends JFrame implements ListSelectionListener {
 
 	public static void main(String[] args) {
-		new GraphTest("/classes.dex").setVisible(true);
+		File dexFile = new File("/tmp/classes.dex");
+		new GraphTest(dexFile).setVisible(true);
 	}
 
 	private Dex dex;
-	private mxGraphComponent graphComponent;
+	private JLabel graphComponent;
 	private JList<String> methodSelector;
 	private List<ClassMethodDescriptor> methodList;
 
-	private GraphTest(String fileName) {
+	private GraphTest(File dexFile) {
 		try {
-			File dexFile = new File(getClass().getResource(fileName).toURI());
 			dex = new Dex(dexFile);
 			dex.parse();
-		} catch (URISyntaxException e) {
-			throw new RuntimeException("Invalid resource URI", e);
 		} catch (IOException e) {
 			throw new RuntimeException("Can't read DEX archive", e);
 		} catch (DexFormatException e) {
@@ -72,9 +62,9 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 	private void init() {
 		Container content = getContentPane();
 
-		graphComponent = new mxGraphComponent(new mxGraph());
-		graphComponent.setConnectable(false);
-		content.add(graphComponent);
+		graphComponent = new JLabel();
+		JScrollPane scrolling = new JScrollPane(graphComponent);
+		content.add(scrolling);
 		
 		JPanel sidebar = new JPanel();
 		methodSelector = new JList<String>();
@@ -90,10 +80,10 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 		content.add(sidebar);
 
 		SpringLayout contentLayout = new SpringLayout();
-		contentLayout.putConstraint(SpringLayout.NORTH, graphComponent, 0, SpringLayout.NORTH, content);
-		contentLayout.putConstraint(SpringLayout.WEST, graphComponent, 0, SpringLayout.WEST, content);
-		contentLayout.putConstraint(SpringLayout.SOUTH, graphComponent, 0, SpringLayout.SOUTH, content);
-		contentLayout.putConstraint(SpringLayout.EAST, graphComponent, 0, SpringLayout.WEST, sidebar);
+		contentLayout.putConstraint(SpringLayout.NORTH, scrolling, 0, SpringLayout.NORTH, content);
+		contentLayout.putConstraint(SpringLayout.WEST, scrolling, 0, SpringLayout.WEST, content);
+		contentLayout.putConstraint(SpringLayout.SOUTH, scrolling, 0, SpringLayout.SOUTH, content);
+		contentLayout.putConstraint(SpringLayout.EAST, scrolling, 0, SpringLayout.WEST, sidebar);
 		contentLayout.putConstraint(SpringLayout.NORTH, sidebar, 0, SpringLayout.NORTH, content);
 		contentLayout.putConstraint(SpringLayout.SOUTH, sidebar, 0, SpringLayout.SOUTH, content);
 		contentLayout.putConstraint(SpringLayout.EAST, sidebar, 0, SpringLayout.EAST, content);
@@ -127,19 +117,8 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 		if (code != null) {
 			try {
 				Function fn = generator.symbolicate(generator.transformToPseudoCode(code, (ClassMethodDescriptor) desc));
-				mxGraph graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
-		
-				graph.setCellsDeletable(false);
-				graph.setCellsDisconnectable(false);
-				graph.setCellsEditable(false);
-				/*Map<String, Object> styles = graph.getStylesheet().getDefaultEdgeStyle();
-				styles.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
-				graph.getStylesheet().setDefaultEdgeStyle(styles);*/
-		
-				mxGraphLayout layout = new mxHierarchicalLayout(graph);
-				layout.execute(graph.getDefaultParent());
-				
-				graphComponent.setGraph(graph);
+				Graphviz graph = new GraphvizAdapter<>(fn.code).getGraph();
+				graphComponent.setIcon(new ImageIcon(graph.render(Format.SVG).toImage()));
 			} catch (ProgramVerificationException e) {
 				e.printStackTrace();
 			}

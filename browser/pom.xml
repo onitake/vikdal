@@ -75,5 +75,15 @@
   		<artifactId>jgraphx</artifactId>
   		<version>2.1.0.7</version>
   	</dependency>
+    <dependency>
+      <groupId>guru.nidi</groupId>
+      <artifactId>graphviz-java</artifactId>
+      <version>0.8.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.7.26</version>
+    </dependency>
   </dependencies>
 </project>

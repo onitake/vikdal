@@ -19,6 +19,7 @@ import javax.swing.filechooser.*;
 import javax.swing.tree.*;
 
 import ch.seto.vikdal.ProgressListener;
+import ch.seto.vikdal.adapter.GraphvizAdapter;
 import ch.seto.vikdal.dalvik.*;
 import ch.seto.vikdal.dex.*;
 import ch.seto.vikdal.java.*;
@@ -27,13 +28,8 @@ import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.GraphEdge;
 import ch.seto.vikdal.java.transformers.GraphNode;
 import ch.seto.vikdal.java.transformers.ProgramVerificationException;
-
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
-import com.mxgraph.swing.mxGraphComponent;
-import com.mxgraph.view.mxGraph;
-
-import org.jgrapht.ext.JGraphXAdapter;
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
 
 import javax.swing.SwingWorker.StateValue;
 import javax.swing.border.BevelBorder;
@@ -50,7 +46,7 @@ public class Browser {
 	private List<ClassDescriptor> classList;
 
 	private JFrame frame;
-	private mxGraphComponent graphComponent;
+	private JLabel graphComponent;
 	private JMenuBar menuBar;
 	private JLabel statusBarLabel;
 	private JProgressBar progressBar;
@@ -152,8 +148,9 @@ public class Browser {
 		contentLayout.putConstraint(SpringLayout.EAST, objectDescription, 6, SpringLayout.EAST, frame.getContentPane());
 		frame.getContentPane().add(objectDescription);
 		
-		graphComponent = new mxGraphComponent(new mxGraph());
-		graphComponent.setConnectable(false);
+		graphComponent = new JLabel();
+
+		JScrollPane graphScrollPane = new JScrollPane(graphComponent);
 
 		JSplitPane splitPane = new JSplitPane();
 		contentLayout.putConstraint(SpringLayout.NORTH, splitPane, 26, SpringLayout.NORTH, frame.getContentPane());
@@ -161,7 +158,7 @@ public class Browser {
 		contentLayout.putConstraint(SpringLayout.EAST, splitPane, -6, SpringLayout.EAST, frame.getContentPane());
 		frame.getContentPane().add(splitPane);
 		splitPane.setLeftComponent(classScrollPane);
-		splitPane.setRightComponent(graphComponent);
+		splitPane.setRightComponent(graphScrollPane);
 		splitPane.setResizeWeight(0);
 		splitPane.setDividerLocation(300);
 		
@@ -248,27 +245,15 @@ public class Browser {
 	protected void displayMethod(ClassMethodDescriptor method) {
 		CodeGraphGenerator generator = new CodeGraphGenerator(dex);
 
-		mxGraph graph = new mxGraph();
+		ImageIcon graph = null;
 		if (method != null) {
 			SortedMap<Integer, Instruction> code = dex.getCode(method.methodid);
 			if (code != null) {
 				try {
 					Function fn = generator.symbolicate(generator.transformToPseudoCode(code, method));
-					graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
-			
-					graph.setCellsDeletable(false);
-					graph.setCellsDisconnectable(false);
-					graph.setCellsEditable(false);
-					
-					// Turn all edges into curves
-					// Doesn't work very well, messes up the arrows
-					/*Map<String, Object> styles = graph.getStylesheet().getDefaultEdgeStyle();
-					styles.put(mxConstants.STYLE_SHAPE, mxConstants.SHAPE_CURVE);
-					graph.getStylesheet().setDefaultEdgeStyle(styles);*/
-			
-					mxGraphLayout layout = new mxHierarchicalLayout(graph);
-					layout.execute(graph.getDefaultParent());
-				
+
+					graph = new ImageIcon(new GraphvizAdapter<>(fn.code).getGraph().render(Format.SVG).toImage());
+
 					statusBarLabel.setText("Showing method " + method.name);
 				} catch (ProgramVerificationException e) {
 					statusBarLabel.setText("Method " + method.name + " failed verification, can't show code graph: " + e);
@@ -279,8 +264,8 @@ public class Browser {
 		} else {
 			statusBarLabel.setText("No method definition found");
 		}
-		graphComponent.setGraph(graph);
-		graphComponent.refresh();
+
+		graphComponent.setIcon(graph);
 	}
 	
 	/**
