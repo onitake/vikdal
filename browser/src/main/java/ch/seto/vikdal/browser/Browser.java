@@ -6,6 +6,7 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.jar.JarFile;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
 import java.awt.*;
@@ -289,8 +290,9 @@ public class Browser {
 	 */
 	protected void load(final File filename) {
 		final SwingWorker<Dex, Object> worker = new SwingWorker<Dex, Object>() {
+			private final Pattern pattern = Pattern.compile(".*\\.apk", Pattern.CASE_INSENSITIVE);
 			public Dex doInBackground() {
-				final boolean isjar = filename.getName().matches(".*\\.[aA][pP][kK]");
+				final boolean isjar = pattern.matcher(filename.getName()).matches();
 				ProgressListener listener = new ProgressListener() {
 					public void progressUpdated(float progress) {
 						if (isjar) {
