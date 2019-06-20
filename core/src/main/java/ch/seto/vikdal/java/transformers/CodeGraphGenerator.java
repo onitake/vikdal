@@ -39,10 +39,10 @@ public class CodeGraphGenerator {
 	public Function transformToPseudoCode(SortedMap<Integer, Instruction> code, ClassMethodDescriptor method) throws ProgramVerificationException {
 		// generate a code graph from the instruction list
 		DirectedGraph<GraphNode, GraphEdge> graph = new DirectedMultigraph<GraphNode, GraphEdge>(GraphEdge.FACTORY);
-		Map<Integer, GraphNode> nodes = new LinkedHashMap<Integer, GraphNode>();
-		GraphNode previous = null;
+		Map<Integer, InstructionGraphNode> nodes = new LinkedHashMap<Integer, InstructionGraphNode>();
+		InstructionGraphNode previous = null;
 		for (Map.Entry<Integer, Instruction> entry : code.entrySet()) {
-			GraphNode node = new GraphNode(entry.getKey(), entry.getValue());
+			InstructionGraphNode node = new InstructionGraphNode(entry.getKey(), entry.getValue());
 			graph.addVertex(node);
 			nodes.put(node.getAddress(), node);
 			if (previous != null) {
@@ -51,7 +51,8 @@ public class CodeGraphGenerator {
 			previous = node;
 		}
 		for (GraphNode node : graph.vertexSet()) {
-			Instruction instruction = node.getInstruction();
+			InstructionGraphNode inode = (InstructionGraphNode) node;
+			Instruction instruction = inode.getInstruction();
 			if (instruction.hasBranches()) {
 				// all other edges are branch targets
 				if (instruction.getBranches().length == 0) {
@@ -59,7 +60,7 @@ public class CodeGraphGenerator {
 				}
 				int offset;
 				if (instruction.areBranchesRelative()) {
-					offset = node.getAddress();
+					offset = inode.getAddress();
 				} else {
 					offset = 0;
 				}
@@ -71,7 +72,7 @@ public class CodeGraphGenerator {
 				)) {
 					for (int branch : instruction.getBranches()) {
 						branch += offset;
-						GraphNode target = nodes.get(branch);
+						InstructionGraphNode target = nodes.get(branch);
 						if (target == null) {
 							throw new ProgramVerificationException("Invalid branch target " + branch);
 						}
@@ -80,7 +81,7 @@ public class CodeGraphGenerator {
 							if (tinstruction.hasBranches()) {
 								for (int sbranch : tinstruction.getBranches()) {
 									sbranch += offset;
-									GraphNode starget = nodes.get(sbranch);
+									InstructionGraphNode starget = nodes.get(sbranch);
 									if (starget == null) {
 										throw new ProgramVerificationException("Invalid branch target " + sbranch);
 									}
@@ -112,32 +113,33 @@ public class CodeGraphGenerator {
 		// - collect unconditional goto and return statements
 		// - generate a searchable map of addresses to vertices
 		// - find entry and exit points
-		GraphNode entryVertex = null;
-		Set<GraphNode> returnVertices = new HashSet<GraphNode>();
+		InstructionGraphNode entryVertex = null;
+		Set<InstructionGraphNode> returnVertices = new HashSet<InstructionGraphNode>();
 		Set<GraphEdge> deadEdges = new LinkedHashSet<GraphEdge>();
-		Map<Integer, GraphNode> vertexMap = new HashMap<Integer, GraphNode>();
+		Map<Integer, InstructionGraphNode> vertexMap = new HashMap<Integer, InstructionGraphNode>();
 		for (GraphNode node : graph.vertexSet()) {
+			InstructionGraphNode inode = (InstructionGraphNode) node;
 			// eliminate all edges after a return or throw
-			if (node.getInstruction() instanceof Return || node.getInstruction() instanceof ReturnVoid || node.getInstruction() instanceof Throw) {
+			if (inode.getInstruction() instanceof Return || inode.getInstruction() instanceof ReturnVoid || inode.getInstruction() instanceof Throw) {
 				deadEdges.addAll(graph.outgoingEdgesOf(node));
 			}
 			// eliminate edges from goto instructions that are not branches
-			if (node.getInstruction() instanceof Goto) {
+			if (inode.getInstruction() instanceof Goto) {
 				deadEdges.addAll(GraphEdge.edgesWithoutTag(graph.outgoingEdgesOf(node), EdgeTag.GOTO));
 			}
 			
 			// add vertex to search map
-			vertexMap.put(node.getAddress(), node);
+			vertexMap.put(inode.getAddress(), inode);
 			
 			// find the entry and exit points
-			if (node.getAddress() == 0) {
+			if (inode.getAddress() == 0) {
 				if (entryVertex != null) {
 					throw new ProgramVerificationException("Graph has multiple entry points");
 				}
-				entryVertex = node;
+				entryVertex = inode;
 			}
-			if (node.getInstruction() instanceof Return || node.getInstruction() instanceof ReturnVoid) {
-				returnVertices.add(node);
+			if (inode.getInstruction() instanceof Return || inode.getInstruction() instanceof ReturnVoid) {
+				returnVertices.add(inode);
 			}
 		}
 		
@@ -166,7 +168,7 @@ public class CodeGraphGenerator {
 		for (int i = 0; i < method.parameters.size(); i++) {
 			parameters[i + ioffset] = method.parameters.get(i);
 		}
-		GraphNode headerVertex = new GraphNode(-1, new Entry(method.returntype, method.name, method.registers - method.inputs, method.inputs, parameters));
+		InstructionGraphNode headerVertex = new InstructionGraphNode(-1, new Entry(method.returntype, method.name, method.registers - method.inputs, method.inputs, parameters));
 		graph.addVertex(headerVertex);
 		graph.addEdge(headerVertex, entryVertex).setTag(EdgeTag.ENTRY);
 		
@@ -183,8 +185,8 @@ public class CodeGraphGenerator {
 		});
 		// break out try blocks
 		for (TryDescriptor ex : exceptions) {
-			GraphNode start = vertexMap.get(ex.start);
-			GraphNode end = vertexMap.get(ex.start + ex.length);
+			InstructionGraphNode start = vertexMap.get(ex.start);
+			InstructionGraphNode end = vertexMap.get(ex.start + ex.length);
 			if (start != null && end != null) {
 				int[] types = new int[ex.catches.size()];
 				int[] catches = new int[ex.catches.size()];
@@ -194,8 +196,8 @@ public class CodeGraphGenerator {
 					catches[i] = entry.getValue();
 					i++;
 				}
-				GraphNode trynode = new GraphNode(-1, new Try());
-				GraphNode catnode = new GraphNode(-1, new Catch(types, catches, ex.catchall));
+				InstructionGraphNode trynode = new InstructionGraphNode(-1, new Try());
+				InstructionGraphNode catnode = new InstructionGraphNode(-1, new Catch(types, catches, ex.catchall));
 				graph.addVertex(trynode);
 				graph.addVertex(catnode);
 				// copy the edge lists to avoid concurrent modifications
@@ -318,9 +320,9 @@ public class CodeGraphGenerator {
 	private Block instructifyGraph(Function fn, GraphNode vertex) {
 		Block ret = new Block();
 		// generate an expression block
-		if (vertex.getInstruction() instanceof Entry) {
+		/*if (vertex.getInstruction() instanceof Entry) {
 			
-		}
+		}*/
 		return ret;
 	}
 

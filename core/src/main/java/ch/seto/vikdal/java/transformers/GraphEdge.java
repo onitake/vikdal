@@ -35,15 +35,17 @@ public class GraphEdge {
 	@Override
 	public String toString() {
 		StringBuilder ret = new StringBuilder();
-		if (source.getAddress() != -1) {
-			ret.append(source.getAddress());
+		String from = source.edgeFromDescription();
+		String to = target.edgeToDescription();
+		if (from != null) {
+			ret.append(from);
 		}
-		if (source.getAddress() != -1 || target.getAddress() != -1) {
+		if (from != null || to != null) {
 			// right arrow
 			ret.append(" \u2192 ");
 		}
-		if (target.getAddress() != -1) {
-			ret.append(target.getAddress());
+		if (to != null) {
+			ret.append(to);
 		}
 		if (getTag() != EdgeTag.DEFAULT) {
 			ret.append(" [");

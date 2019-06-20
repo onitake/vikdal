@@ -45,13 +45,16 @@ public class GraphSymbolicator extends TraversalListenerAdapter<GraphNode, Graph
 	@Override
 	public void vertexFinished(VertexTraversalEvent<GraphNode> e) {
 		GraphNode node = e.getVertex();
-		// use the initial state tracker instance to symbolicate this node
-		StateTracker previous = stack.get(node);
-		// update the node's description
-		if (previous != null) {
-			node.setDescription(node.getInstruction().toString(symbols, previous));
-		} else {
-			node.setDescription(node.getInstruction().toString(symbols, tracker));
+		if (node instanceof InstructionGraphNode) {
+			InstructionGraphNode inode = (InstructionGraphNode) node;
+			// use the initial state tracker instance to symbolicate this node
+			StateTracker previous = stack.get(node);
+			// update the node's description
+			if (previous != null) {
+				inode.setDescription(inode.getInstruction().toString(symbols, previous));
+			} else {
+				inode.setDescription(inode.getInstruction().toString(symbols, tracker));
+			}
 		}
 	}
 }
