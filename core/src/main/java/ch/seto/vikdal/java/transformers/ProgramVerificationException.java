@@ -1,8 +1,8 @@
 package ch.seto.vikdal.java.transformers;
 
-public class ProgramVerificationException extends Exception {
+public class ProgramVerificationException extends RuntimeException {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	public ProgramVerificationException() {
 		super();
