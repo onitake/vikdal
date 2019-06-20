@@ -24,6 +24,7 @@ import ch.seto.vikdal.dalvik.*;
 import ch.seto.vikdal.dex.*;
 import ch.seto.vikdal.java.*;
 import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
+import ch.seto.vikdal.java.transformers.Decompiler;
 import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.GraphEdge;
 import ch.seto.vikdal.java.transformers.GraphNode;
@@ -247,14 +248,14 @@ public class Browser {
 	 * Evaluate a method and display the code graph
 	 */
 	protected void displayMethod(ClassMethodDescriptor method) {
-		CodeGraphGenerator generator = new CodeGraphGenerator(dex);
+		Decompiler decompiler = new Decompiler(dex);
 
 		mxGraph graph = new mxGraph();
 		if (method != null) {
 			SortedMap<Integer, Instruction> code = dex.getCode(method.methodid);
 			if (code != null) {
 				try {
-					Function fn = generator.symbolicate(generator.transformToPseudoCode(code, method));
+					Function fn = decompiler.transform(code, method);
 					graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
 			
 					graph.setCellsDeletable(false);

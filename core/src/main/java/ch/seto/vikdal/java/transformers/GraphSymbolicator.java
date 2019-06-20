@@ -14,6 +14,10 @@ public class GraphSymbolicator extends TraversalListenerAdapter<GraphNode, Graph
 	private StateTracker tracker;
 	private boolean success;
 	
+	public GraphSymbolicator(SymbolTable table) {
+		this(table, new StateTracker());
+	}
+
 	public GraphSymbolicator(SymbolTable table, StateTracker initial) {
 		success = true;
 		symbols = table;

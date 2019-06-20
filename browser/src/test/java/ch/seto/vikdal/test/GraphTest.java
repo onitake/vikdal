@@ -27,6 +27,7 @@ import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.ClassMethodDescriptor;
 import ch.seto.vikdal.java.MethodDescriptor;
 import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
+import ch.seto.vikdal.java.transformers.Decompiler;
 import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.GraphEdge;
 import ch.seto.vikdal.java.transformers.GraphNode;
@@ -122,11 +123,11 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 			desc = methodList.get(i);
 		}
 
-		CodeGraphGenerator generator = new CodeGraphGenerator(dex);
+		Decompiler decompiler = new Decompiler(dex);
 
 		if (code != null) {
 			try {
-				Function fn = generator.symbolicate(generator.transformToPseudoCode(code, (ClassMethodDescriptor) desc));
+				Function fn = decompiler.transform(code, (ClassMethodDescriptor) desc);
 				mxGraph graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
 		
 				graph.setCellsDeletable(false);

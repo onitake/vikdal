@@ -12,7 +12,9 @@ import ch.seto.vikdal.dex.DexFormatException;
 import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.ClassMethodDescriptor;
 import ch.seto.vikdal.java.code.Method;
+import ch.seto.vikdal.java.transformers.AstGenerator;
 import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
+import ch.seto.vikdal.java.transformers.Decompiler;
 import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.ProgramVerificationException;
 import japa.parser.ast.Node;
@@ -73,13 +75,13 @@ public class AstTest {
 	}
 
 	private Dex dex;
-	private CodeGraphGenerator generator;
+	private Decompiler decompiler;
 
 	private AstTest(File dexFile) {
 		try {
 			dex = new Dex(dexFile);
 			dex.parse();
-			generator = new CodeGraphGenerator(dex);
+			decompiler = new Decompiler(dex);
 		} catch (IOException e) {
 			throw new RuntimeException("Can't read DEX archive", e);
 		} catch (DexFormatException e) {
@@ -103,9 +105,8 @@ public class AstTest {
 		}
 		SortedMap<Integer, Instruction> code = dex.getCode(methodId);
 		try {
-			Function fn = generator.transformToPseudoCode(code, cm);
-			Function fns = generator.symbolicate(fn);
-			Method m = generator.transformToStatements(fns);
+			Function fn = decompiler.transform(code, cm);
+			Method m = new AstGenerator(dex).transformToStatements(fn);
 			return m.getASTBody();
 		} catch (ProgramVerificationException e) {
 			throw new RuntimeException("Can't decompile", e);
