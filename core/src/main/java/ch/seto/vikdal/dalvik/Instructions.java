@@ -331,7 +331,7 @@ public final class Instructions {
 		} else {
 			InstructionFactory factory = INSTRUCTION_MAP[opcode];
 			if (factory != null) {
-				Instruction ret = (Instruction) factory.newInstance();
+				Instruction ret = factory.newInstance();
 				ret.setArguments(bytecode, off);
 				return ret;
 			}
