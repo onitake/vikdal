@@ -5,6 +5,9 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ThrowStmt;
 
 public class Throw extends AbstractInstruction {
 
@@ -42,6 +45,14 @@ public class Throw extends AbstractInstruction {
 	@Override
 	public String toString(SymbolTable table, StateTracker tracker) {
 		return "throw " + tracker.getRegisterName(vA);
+	}
+
+	@Override
+	public Node toAST() {
+		NameExpr valexp = new NameExpr("v" + vA);
+		Node ret = new ThrowStmt(valexp);
+		ret.setData(this);
+		return ret;
 	}
 	
 }

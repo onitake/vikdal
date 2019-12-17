@@ -5,6 +5,11 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.AssignExpr.Operator;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.expr.NameExpr;
 
 public class BinOp2Addr extends AbstractInstruction {
 
@@ -91,5 +96,74 @@ public class BinOp2Addr extends AbstractInstruction {
 		String regB = tracker.getRegisterName(vB);
 		return tracker.getRegisterName(vA) + " " + operation.operator + "= " + regB;
 	}
+
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		NameExpr srcexp = new NameExpr("v" + vB);
+		Operator opexp = null;
+		switch (operation) {
+		case add_double:
+		case add_float:
+		case add_int:
+		case add_long:
+			opexp = Operator.plus;
+			break;
+		case and_int:
+		case and_long:
+			opexp = Operator.and;
+			break;
+		case div_double:
+		case div_float:
+		case div_int:
+		case div_long:
+			opexp = Operator.slash;
+			break;
+		case mul_double:
+		case mul_float:
+		case mul_int:
+		case mul_long:
+			opexp = Operator.star;
+			break;
+		case or_int:
+		case or_long:
+			opexp = Operator.or;
+			break;
+		case rem_double:
+		case rem_float:
+		case rem_int:
+		case rem_long:
+			opexp = Operator.rem;
+			break;
+		case shl_int:
+		case shl_long:
+			opexp = Operator.lShift;
+			break;
+		case shr_int:
+		case shr_long:
+			opexp = Operator.rSignedShift;
+			break;
+		case sub_double:
+		case sub_float:
+		case sub_int:
+		case sub_long:
+			opexp = Operator.minus;
+			break;
+		case ushr_int:
+		case ushr_long:
+			opexp = Operator.rUnsignedShift;
+			break;
+		case xor_int:
+		case xor_long:
+			opexp = Operator.xor;
+			break;
+		}
+		if (opexp == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, srcexp, opexp));
+		ret.setData(this);
+		return ret;
+	}	
 
 }

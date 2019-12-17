@@ -6,6 +6,13 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.StringLiteralExpr;
+import japa.parser.ast.expr.AssignExpr.Operator;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class ConstObject extends AbstractInstruction {
 
@@ -70,5 +77,21 @@ public class ConstObject extends AbstractInstruction {
 		} else {
 			return tracker.getRegisterName(vA) + " = \"" + table.lookupString(value) + "\"";
 		}
+	}
+
+	@Override
+	public Node toAST() {
+		Expression exp = null;
+		if (operation == Operation.const_class) {
+			// TODO TYPE LOOKUP
+			exp = new NameExpr("TYPE_" + value);
+		} else {
+			// TODO STRING LOOKUP
+			 exp = new StringLiteralExpr("STRING_" + value);
+		}
+		NameExpr varexp = new NameExpr("v" + vA);
+		Node ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));
+		ret.setData(this);
+		return ret;
 	}
 }

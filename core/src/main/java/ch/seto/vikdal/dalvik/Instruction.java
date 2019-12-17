@@ -2,6 +2,7 @@ package ch.seto.vikdal.dalvik;
 
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
 
 public interface Instruction {
 	/**
@@ -89,4 +90,8 @@ public interface Instruction {
 	 * @param tracker a register state tracker, may be updated
 	 */
 	public String toString(SymbolTable table, StateTracker tracker);
+	/**
+	 * Transforms this instruction into an AST node.
+	 */
+	public Node toAST();
 }

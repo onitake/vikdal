@@ -6,6 +6,11 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.IntegerLiteralExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class Const extends AbstractInstruction {
 
@@ -89,5 +94,14 @@ public class Const extends AbstractInstruction {
 			tracker.setRegisterType(vA, Type.INT);
 			return tracker.getRegisterType(vA).toString() + ' ' + tracker.getRegisterName(vA) + " = " + value + " // " + Float.intBitsToFloat(value) + "f";
 		}
+	}
+
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		IntegerLiteralExpr exp = new IntegerLiteralExpr(String.valueOf(value));
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		ret.setData(this);
+		return ret;
 	}
 }

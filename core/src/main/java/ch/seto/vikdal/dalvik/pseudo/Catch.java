@@ -1,10 +1,17 @@
 package ch.seto.vikdal.dalvik.pseudo;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.body.MultiTypeParameter;
+import japa.parser.ast.stmt.BlockStmt;
+import japa.parser.ast.stmt.CatchClause;
+import japa.parser.ast.stmt.TryStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class Catch extends PseudoInstruction {
 	
@@ -76,5 +83,19 @@ public class Catch extends PseudoInstruction {
 		ret.append(" }");
 		return ret.toString();
 	}
-	
+
+	@Override
+	public Node toAST() {
+		ArrayList<CatchClause> catexps = new ArrayList<CatchClause>();
+		for (int type : types) {
+			// TODO TYPE LOOKUP
+			String typname = "TYPE_" + type;
+			ClassOrInterfaceType typexp = new ClassOrInterfaceType(typname);
+			MultiTypeParameter typpar = new MultiTypeParameter(0, null, Arrays.asList(typexp), null);
+			catexps.add(new CatchClause(typpar, null));
+		}
+		Node ret = new TryStmt(null, catexps, null);
+		ret.setData(this);
+		return ret;
+	}
 }

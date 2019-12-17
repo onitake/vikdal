@@ -1,5 +1,7 @@
 package ch.seto.vikdal.dalvik.instructions;
 
+import java.util.ArrayList;
+
 import ch.seto.vikdal.dalvik.Format;
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
@@ -7,6 +9,13 @@ import ch.seto.vikdal.java.MethodDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.ClassExpr;
+import japa.parser.ast.expr.Expression;
+import japa.parser.ast.expr.MethodCallExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.SuperExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class InvokeRange extends AbstractInstruction {
 
@@ -112,5 +121,36 @@ public class InvokeRange extends AbstractInstruction {
 		}
 		ret.append(")");
 		return ret.toString();
+	}
+
+	@Override
+	public Node toAST() {
+		// TODO METHOD LOOKUP
+		String methodname = "METHOD_" + method;
+		ArrayList<Expression> argsexp = new ArrayList<Expression>();
+		for (int n = 0; n < size; n++) {
+			NameExpr argexp = new NameExpr("v" + (vC + n));
+			argsexp.add(argexp);
+		}
+		Expression classexp = null;
+		switch (operation) {
+		case invoke_direct:
+		case invoke_interface:
+		case invoke_static:
+		case invoke_virtual:
+			// TODO pass method's containing type
+			classexp = new ClassExpr();
+			break;
+		case invoke_super:
+			// TODO pass method's containing type
+			classexp = new SuperExpr();
+			break;
+		}
+		if (classexp == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		Node ret = new ExpressionStmt(new MethodCallExpr(classexp, methodname, argsexp));
+		ret.setData(this);
+		return ret;
 	}
 }

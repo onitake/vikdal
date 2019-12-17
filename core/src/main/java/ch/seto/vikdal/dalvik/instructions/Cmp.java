@@ -5,6 +5,11 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.BinaryExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class Cmp extends AbstractInstruction {
 
@@ -61,5 +66,33 @@ public class Cmp extends AbstractInstruction {
 	@Override
 	public String toString(SymbolTable table, StateTracker tracker) {
 		return tracker.getRegisterName(vA) + " = " + tracker.getRegisterName(vB) + " < " + tracker.getRegisterName(vC) + " ? -1 : " + tracker.getRegisterName(vB) + " > " + tracker.getRegisterName(vC) + " ? 1 : 0"; 
+	}
+
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		NameExpr srcaexp = new NameExpr("v" + vB);
+		NameExpr srcbexp = new NameExpr("v" + vC);
+		BinaryExpr.Operator opexp = null;
+		switch (operation) {
+		case cmp_long:
+			opexp = BinaryExpr.Operator.equals;
+			break;
+		case cmpg_double:
+		case cmpg_float:
+			opexp = BinaryExpr.Operator.greater;
+			break;
+		case cmpl_double:
+		case cmpl_float:
+			opexp = BinaryExpr.Operator.less;
+			break;
+		}
+		if (opexp == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		BinaryExpr exp = new BinaryExpr(srcaexp, srcbexp, opexp);
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		ret.setData(this);
+		return ret;
 	}
 }

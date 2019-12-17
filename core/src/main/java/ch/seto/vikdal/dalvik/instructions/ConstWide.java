@@ -6,6 +6,11 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.LongLiteralExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class ConstWide extends AbstractInstruction {
 
@@ -86,4 +91,14 @@ public class ConstWide extends AbstractInstruction {
 			return tracker.getRegisterType(vA).toString() + ' ' + tracker.getRegisterName(vA) + " = " + value + "L // " + Double.longBitsToDouble(value);
 		}
 	}
+
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		LongLiteralExpr exp = new LongLiteralExpr(String.valueOf(value));
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		ret.setData(this);
+		return ret;
+	}
+
 }

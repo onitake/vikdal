@@ -5,6 +5,11 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.BinaryExpr;
+import japa.parser.ast.expr.IntegerLiteralExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.IfStmt;
 
 public class IfTestZ extends AbstractInstruction {
 
@@ -76,4 +81,37 @@ public class IfTestZ extends AbstractInstruction {
 		return "if (" + tracker.getRegisterName(vA) + " " + operation.operator + " 0) GOTO " + (branch >= 0 ? "+" : "") + branch;
 	}
 
+	@Override
+	public Node toAST() {
+		NameExpr srcexp = new NameExpr("v" + vA);
+		BinaryExpr.Operator opexp = null;
+		switch (operation) {
+		case if_eqz:
+			opexp = BinaryExpr.Operator.equals;
+			break;
+		case if_gez:
+			opexp = BinaryExpr.Operator.greaterEquals;
+			break;
+		case if_gtz:
+			opexp = BinaryExpr.Operator.greater;
+			break;
+		case if_lez:
+			opexp = BinaryExpr.Operator.lessEquals;
+			break;
+		case if_ltz:
+			opexp = BinaryExpr.Operator.less;
+			break;
+		case if_nez:
+			opexp = BinaryExpr.Operator.notEquals;
+			break;
+		}
+		if (opexp == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		BinaryExpr exp = new BinaryExpr(srcexp, new IntegerLiteralExpr("0"), opexp);
+		Node ret = new IfStmt(exp, null, null);
+		ret.setData(this);
+		return ret;
+	}
+	
 }

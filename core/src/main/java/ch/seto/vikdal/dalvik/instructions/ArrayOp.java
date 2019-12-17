@@ -6,6 +6,12 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.ArrayAccessExpr;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.AssignExpr.Operator;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.expr.NameExpr;
 
 public class ArrayOp extends AbstractInstruction {
 
@@ -137,5 +143,39 @@ public class ArrayOp extends AbstractInstruction {
 		} else {
 			return tracker.getRegisterName(vB) + "[" + tracker.getRegisterName(vC) + "] = " + tracker.getRegisterName(vA);
 		}
+	}
+
+	@Override
+	public Node toAST() {
+		NameExpr arrexp = new NameExpr("v" + vB);
+		NameExpr idxexp = new NameExpr("v" + vC);
+		ArrayAccessExpr exp = new ArrayAccessExpr(arrexp, idxexp);
+		NameExpr valexp = new NameExpr("v" + vA);
+		Node ret = null;
+		switch (operation) {
+		case aget:
+		case aget_boolean:
+		case aget_byte:
+		case aget_char:
+		case aget_object:
+		case aget_short:
+		case aget_wide:
+			ret = new ExpressionStmt(new AssignExpr(valexp, exp, Operator.assign));
+			break;
+		case aput:
+		case aput_boolean:
+		case aput_byte:
+		case aput_char:
+		case aput_object:
+		case aput_short:
+		case aput_wide:
+			ret = new ExpressionStmt(new AssignExpr(exp, valexp, Operator.assign));
+			break;
+		}
+		if (ret == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		ret.setData(this);
+		return ret;
 	}
 }

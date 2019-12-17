@@ -6,6 +6,12 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.ArrayCreationExpr;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class NewArray extends AbstractInstruction {
 
@@ -48,4 +54,16 @@ public class NewArray extends AbstractInstruction {
 		tracker.setRegisterType(vA, Type.ARRAY);
 		return tracker.getRegisterName(vA) + " = new " + Type.humanReadableDescriptor(table.lookupType(type)) + "[" + regB + "]";
 	}
+
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		// TODO TYPE LOOKUP
+		ClassOrInterfaceType typexp = new ClassOrInterfaceType("TYPE_" + type);
+		ArrayCreationExpr exp = new ArrayCreationExpr(typexp, vB, null);
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		ret.setData(this);
+		return ret;
+	}
+
 }

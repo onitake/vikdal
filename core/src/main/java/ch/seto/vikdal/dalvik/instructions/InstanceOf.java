@@ -6,6 +6,13 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.AssignExpr.Operator;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.expr.InstanceOfExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class InstanceOf extends AbstractInstruction {
 
@@ -46,5 +53,17 @@ public class InstanceOf extends AbstractInstruction {
 	public String toString(SymbolTable table, StateTracker tracker) {
 		tracker.setRegisterType(vA, Type.BOOLEAN);
 		return tracker.getRegisterName(vA) + " = " + tracker.getRegisterName(vB) + " instanceof " + Type.humanReadableDescriptor(table.lookupType(type));
+	}
+
+	@Override
+	public Node toAST() {
+		NameExpr srcexp = new NameExpr("v" + vB);
+		// TODO TYPE LOOKUP
+		ClassOrInterfaceType typexp = new ClassOrInterfaceType("TYPE_" + type);
+		InstanceOfExpr exp = new InstanceOfExpr(srcexp, typexp);
+		NameExpr targexp = new NameExpr("v" + vA);
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, Operator.assign));
+		ret.setData(this);
+		return ret;
 	}
 }

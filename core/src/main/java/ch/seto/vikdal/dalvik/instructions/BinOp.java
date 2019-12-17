@@ -5,6 +5,9 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.*;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class BinOp extends AbstractInstruction {
 
@@ -94,5 +97,77 @@ public class BinOp extends AbstractInstruction {
 		tracker.setRegisterType(vA, tracker.getRegisterType(vB));
 		return tracker.getRegisterName(vA) + " = " + regB + " " + operation.operator + " " + regC;
 	}
-	
+
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		NameExpr srcaexp = new NameExpr("v" + vB);
+		NameExpr srcbexp = new NameExpr("v" + vC);
+		BinaryExpr.Operator opexp = null;
+		switch (operation) {
+		case add_double:
+		case add_float:
+		case add_int:
+		case add_long:
+			opexp = BinaryExpr.Operator.plus;
+			break;
+		case and_int:
+		case and_long:
+			// boolean AND is not covered by this
+			opexp = BinaryExpr.Operator.binAnd;
+			break;
+		case div_double:
+		case div_float:
+		case div_int:
+		case div_long:
+			opexp = BinaryExpr.Operator.divide;
+			break;
+		case mul_double:
+		case mul_float:
+		case mul_int:
+		case mul_long:
+			opexp = BinaryExpr.Operator.times;
+			break;
+		case or_int:
+		case or_long:
+			// boolean OR is not covered by this
+			opexp = BinaryExpr.Operator.binOr;
+			break;
+		case rem_double:
+		case rem_float:
+		case rem_int:
+		case rem_long:
+			opexp = BinaryExpr.Operator.remainder;
+			break;
+		case shl_int:
+		case shl_long:
+			opexp = BinaryExpr.Operator.lShift;
+			break;
+		case shr_int:
+		case shr_long:
+			opexp = BinaryExpr.Operator.rSignedShift;
+			break;
+		case sub_double:
+		case sub_float:
+		case sub_int:
+		case sub_long:
+			opexp = BinaryExpr.Operator.minus;
+			break;
+		case ushr_int:
+		case ushr_long:
+			opexp = BinaryExpr.Operator.rUnsignedShift;
+			break;
+		case xor_int:
+		case xor_long:
+			opexp = BinaryExpr.Operator.xor;
+			break;
+		}
+		if (opexp == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		BinaryExpr exp = new BinaryExpr(srcaexp, srcbexp, opexp);
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		ret.setData(this);
+		return ret;
+	}	
 }

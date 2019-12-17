@@ -4,6 +4,9 @@ import ch.seto.vikdal.dalvik.Format;
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.comments.BlockComment;
+import japa.parser.ast.stmt.EmptyStmt;
 
 public abstract class PseudoInstruction implements Instruction {
 
@@ -63,6 +66,16 @@ public abstract class PseudoInstruction implements Instruction {
 	@Override
 	public String toString(SymbolTable table, StateTracker tracker) {
 		return toString();
+	}
+
+	@Override
+	public Node toAST() {
+		// default transformation: just turn this into a block comment containing the pseudo instruction,
+		// attached to an empty statement
+		Node ret = new EmptyStmt();
+		ret.setComment(new BlockComment(toString()));
+		ret.setData(this);
+		return ret;
 	}
 
 }

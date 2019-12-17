@@ -5,6 +5,12 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.BinaryExpr;
+import japa.parser.ast.expr.IntegerLiteralExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class BinOpLit extends AbstractInstruction {
 
@@ -101,4 +107,66 @@ public class BinOpLit extends AbstractInstruction {
 		}
 	}
 
+	@Override
+	public Node toAST() {
+		NameExpr targexp = new NameExpr("v" + vA);
+		NameExpr srcexp = new NameExpr("v" + vB);
+		IntegerLiteralExpr valexp = new IntegerLiteralExpr(String.valueOf(value));
+		BinaryExpr.Operator opexp = null;
+		switch (operation) {
+		case add_int16:
+		case add_int8:
+			opexp = BinaryExpr.Operator.plus;
+			break;
+		case and_int16:
+		case and_int8:
+			opexp = BinaryExpr.Operator.binAnd;
+			break;
+		case div_int16:
+		case div_int8:
+			opexp = BinaryExpr.Operator.divide;
+			break;
+		case mul_int16:
+		case mul_int8:
+			opexp = BinaryExpr.Operator.times;
+			break;
+		case or_int16:
+		case or_int8:
+			opexp = BinaryExpr.Operator.binOr;
+			break;
+		case rem_int16:
+		case rem_int8:
+			opexp = BinaryExpr.Operator.remainder;
+			break;
+		case rsub_int16:
+		case rsub_int8:
+			opexp = BinaryExpr.Operator.minus;
+			break;
+		case shl_int8:
+			opexp = BinaryExpr.Operator.lShift;
+			break;
+		case shr_int8:
+			opexp = BinaryExpr.Operator.rSignedShift;
+			break;
+		case ushr_int8:
+			opexp = BinaryExpr.Operator.rUnsignedShift;
+			break;
+		case xor_int16:
+		case xor_int8:
+			opexp = BinaryExpr.Operator.xor;
+			break;
+		}
+		if (opexp == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		BinaryExpr exp = null;
+		if (operation == Operation.rsub_int16 || operation == Operation.rsub_int8) {
+			exp = new BinaryExpr(valexp, srcexp, opexp);
+		} else {
+			exp = new BinaryExpr(srcexp, valexp, opexp);
+		}
+		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		ret.setData(this);
+		return ret;
+	}	
 }

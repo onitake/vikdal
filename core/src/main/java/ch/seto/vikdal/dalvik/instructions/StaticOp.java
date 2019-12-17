@@ -7,6 +7,12 @@ import ch.seto.vikdal.java.FieldDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.FieldAccessExpr;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.expr.AssignExpr.Operator;
+import japa.parser.ast.stmt.ExpressionStmt;
 
 public class StaticOp extends AbstractInstruction {
 
@@ -111,5 +117,38 @@ public class StaticOp extends AbstractInstruction {
 			return Type.humanReadableDescriptor(table.lookupType(def.classid)) + "." + table.lookupField(field).name + " = " + tracker.getRegisterName(vA);
 		}
 		return super.toString(table, tracker);
+	}
+
+	@Override
+	public Node toAST() {
+		// TODO FIELD LOOKUP
+		FieldAccessExpr exp = new FieldAccessExpr(null, "FIELD_" + field);
+		NameExpr valexp = new NameExpr("v" + vA);
+		Node ret = null;
+		switch (operation) {
+		case sget:
+		case sget_boolean:
+		case sget_byte:
+		case sget_char:
+		case sget_object:
+		case sget_short:
+		case sget_wide:
+			ret = new ExpressionStmt(new AssignExpr(valexp, exp, Operator.assign));
+			break;
+		case sput:
+		case sput_boolean:
+		case sput_byte:
+		case sput_char:
+		case sput_object:
+		case sput_short:
+		case sput_wide:
+			ret = new ExpressionStmt(new AssignExpr(exp, valexp, Operator.assign));
+			break;
+		}
+		if (ret == null) {
+			throw new RuntimeException("Invalid operation: " + operation.toString());
+		}
+		ret.setData(this);
+		return ret;
 	}
 }

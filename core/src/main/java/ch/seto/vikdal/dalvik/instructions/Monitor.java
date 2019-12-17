@@ -5,6 +5,12 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
+import japa.parser.ast.Node;
+import japa.parser.ast.comments.BlockComment;
+import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.BlockStmt;
+import japa.parser.ast.stmt.EmptyStmt;
+import japa.parser.ast.stmt.SynchronizedStmt;
 
 public class Monitor extends AbstractInstruction {
 
@@ -64,5 +70,19 @@ public class Monitor extends AbstractInstruction {
 		} else {
 			return "SYNCEND(" + tracker.getRegisterName(vA) + ")";
 		}
+	}
+
+	@Override
+	public Node toAST() {
+		NameExpr valexp = new NameExpr("v" + vA);
+		Node ret = null;
+		if (operation == Operation.monitor_enter) {
+			ret = new SynchronizedStmt(valexp, new BlockStmt());
+		} else {
+			ret = new EmptyStmt();
+			ret.setComment(new BlockComment("SYNCEND v" + vA));
+		}
+		ret.setData(this);
+		return ret;
 	}
 }
