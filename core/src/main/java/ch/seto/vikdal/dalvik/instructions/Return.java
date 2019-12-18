@@ -68,7 +68,7 @@ public class Return extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr valexp = new NameExpr("v" + vA);
 		Node ret = new ReturnStmt(valexp);
 		ret.setData(this);

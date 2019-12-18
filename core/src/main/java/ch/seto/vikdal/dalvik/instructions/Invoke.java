@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import ch.seto.vikdal.dalvik.Format;
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
+import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.MethodDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
@@ -14,8 +15,9 @@ import japa.parser.ast.expr.ClassExpr;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
-import japa.parser.ast.expr.SuperExpr;
+import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class Invoke extends AbstractInstruction {
 
@@ -134,34 +136,47 @@ public class Invoke extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
-		// TODO METHOD LOOKUP
-		String methodname = "METHOD_" + method;
+	public Node toAST(SymbolTable table) {
+		MethodDescriptor mdesc = table.lookupMethod(method);
 		ArrayList<Expression> argsexp = new ArrayList<Expression>();
-		for (int v : vX) {
-			NameExpr argexp = new NameExpr("v" + v);
-			argsexp.add(argexp);
-		}
 		Expression classexp = null;
 		switch (operation) {
+		case invoke_static:
+			for (int n = 0; n < size; n++) {
+				NameExpr argexp = new NameExpr("v" + vX[n]);
+				argsexp.add(argexp);
+			}
+			ClassDescriptor cdesc = table.lookupClass(mdesc.classid);
+			classexp = new ClassExpr(new ClassOrInterfaceType(table.lookupType(cdesc.classid)));
+			break;
 		case invoke_direct:
 		case invoke_interface:
-		case invoke_static:
 		case invoke_virtual:
-			// TODO pass method's containing type
-			classexp = new ClassExpr();
+			if (size < 1) {
+				throw new RuntimeException("Can't call an instance method without object reference");
+			}
+			for (int n = 1; n < size; n++) {
+				NameExpr argexp = new NameExpr("v" + vX[n]);
+				argsexp.add(argexp);
+			}
+			classexp = new NameExpr("v" + vX[0]);
 			break;
 		case invoke_super:
-			// TODO pass method's containing type
-			classexp = new SuperExpr();
+			if (size < 1) {
+				throw new RuntimeException("Can't call an instance method without object reference");
+			}
+			for (int n = 1; n < size; n++) {
+				NameExpr argexp = new NameExpr("v" + vX[n]);
+				argsexp.add(argexp);
+			}
+			classexp = new QualifiedNameExpr(new NameExpr("v" + vX[0]), "super");
 			break;
 		}
 		if (classexp == null) {
 			throw new RuntimeException("Invalid operation: " + operation.toString());
 		}
-		Node ret = new ExpressionStmt(new MethodCallExpr(classexp, methodname, argsexp));
+		Node ret = new ExpressionStmt(new MethodCallExpr(classexp, mdesc.name, argsexp));
 		ret.setData(this);
 		return ret;
 	}
-
 }

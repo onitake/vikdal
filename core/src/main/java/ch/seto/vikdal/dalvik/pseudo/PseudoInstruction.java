@@ -69,7 +69,7 @@ public abstract class PseudoInstruction implements Instruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		// default transformation: just turn this into a block comment containing the pseudo instruction,
 		// attached to an empty statement
 		Node ret = new EmptyStmt();

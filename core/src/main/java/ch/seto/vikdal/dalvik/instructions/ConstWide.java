@@ -93,7 +93,7 @@ public class ConstWide extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		LongLiteralExpr exp = new LongLiteralExpr(String.valueOf(value));
 		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));

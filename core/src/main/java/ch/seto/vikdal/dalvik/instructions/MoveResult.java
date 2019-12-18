@@ -66,7 +66,7 @@ public class MoveResult extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		Node ret = new ExpressionStmt(new AssignExpr(new NameExpr("v" + vA), null, AssignExpr.Operator.assign));
 		ret.setData(this);
 		return ret;

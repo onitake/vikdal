@@ -74,7 +74,7 @@ public class Move extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcexp = new NameExpr("v" + vB);
 		Node ret = new ExpressionStmt(new AssignExpr(targexp, srcexp, AssignExpr.Operator.assign));

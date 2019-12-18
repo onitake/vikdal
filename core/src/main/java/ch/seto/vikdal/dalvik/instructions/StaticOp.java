@@ -3,6 +3,7 @@ package ch.seto.vikdal.dalvik.instructions;
 import ch.seto.vikdal.dalvik.Format;
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
+import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.FieldDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
@@ -12,7 +13,9 @@ import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.AssignExpr.Operator;
+import japa.parser.ast.expr.ClassExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class StaticOp extends AbstractInstruction {
 
@@ -120,9 +123,11 @@ public class StaticOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
-		// TODO FIELD LOOKUP
-		FieldAccessExpr exp = new FieldAccessExpr(null, "FIELD_" + field);
+	public Node toAST(SymbolTable table) {
+		FieldDescriptor fdesc = table.lookupField(field);
+		ClassDescriptor cdesc = table.lookupClass(fdesc.classid);
+		String cname = table.lookupType(cdesc.classid);
+		FieldAccessExpr exp = new FieldAccessExpr(new ClassExpr(new ClassOrInterfaceType(cname)), fdesc.name);
 		NameExpr valexp = new NameExpr("v" + vA);
 		Node ret = null;
 		switch (operation) {

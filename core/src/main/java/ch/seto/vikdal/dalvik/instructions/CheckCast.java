@@ -56,11 +56,10 @@ public class CheckCast extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
-		// TODO TYPE LOOKUP
-		String typename = "TYPE_" + type;
+	public Node toAST(SymbolTable table) {
+		String tname = table.lookupType(type);
 		NameExpr varexp = new NameExpr("v" + vA);
-		CastExpr exp = new CastExpr(new ClassOrInterfaceType(typename), varexp);
+		CastExpr exp = new CastExpr(new ClassOrInterfaceType(tname), varexp);
 		Node ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));
 		ret.setData(this);
 		return ret;

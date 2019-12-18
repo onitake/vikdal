@@ -48,7 +48,7 @@ public class Throw extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr valexp = new NameExpr("v" + vA);
 		Node ret = new ThrowStmt(valexp);
 		ret.setData(this);

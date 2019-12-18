@@ -108,7 +108,7 @@ public class BinOpLit extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcexp = new NameExpr("v" + vB);
 		IntegerLiteralExpr valexp = new IntegerLiteralExpr(String.valueOf(value));

@@ -92,6 +92,7 @@ public interface Instruction {
 	public String toString(SymbolTable table, StateTracker tracker);
 	/**
 	 * Transforms this instruction into an AST node.
+	 * @param table a symbol table to retrieve data from
 	 */
-	public Node toAST();
+	public Node toAST(SymbolTable table);
 }

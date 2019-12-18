@@ -80,14 +80,14 @@ public class ConstObject extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		Expression exp = null;
 		if (operation == Operation.const_class) {
-			// TODO TYPE LOOKUP
-			exp = new NameExpr("TYPE_" + value);
+			String tname = table.lookupType(value);
+			exp = new NameExpr(tname);
 		} else {
-			// TODO STRING LOOKUP
-			 exp = new StringLiteralExpr("STRING_" + value);
+			String str = table.lookupString(value);
+			exp = new StringLiteralExpr(str);
 		}
 		NameExpr varexp = new NameExpr("v" + vA);
 		Node ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));

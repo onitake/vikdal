@@ -54,7 +54,7 @@ public class ArrayLength extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr arrexp = new NameExpr("v" + vB);
 		FieldAccessExpr exp = new FieldAccessExpr(arrexp, "length");
 		NameExpr targexp = new NameExpr("v" + vA);

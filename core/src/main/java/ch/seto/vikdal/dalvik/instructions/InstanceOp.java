@@ -119,10 +119,10 @@ public class InstanceOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr srcexp = new NameExpr("v" + vB);
-		// TODO FIELD LOOKUP
-		FieldAccessExpr exp = new FieldAccessExpr(srcexp, "FIELD_" + field);
+		FieldDescriptor fdesc = table.lookupField(field);
+		FieldAccessExpr exp = new FieldAccessExpr(srcexp, fdesc.name);
 		NameExpr valexp = new NameExpr("v" + vA);
 		Node ret = null;
 		switch (operation) {

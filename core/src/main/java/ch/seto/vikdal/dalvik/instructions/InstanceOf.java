@@ -56,10 +56,10 @@ public class InstanceOf extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr srcexp = new NameExpr("v" + vB);
-		// TODO TYPE LOOKUP
-		ClassOrInterfaceType typexp = new ClassOrInterfaceType("TYPE_" + type);
+		String tname = table.lookupType(type);
+		ClassOrInterfaceType typexp = new ClassOrInterfaceType(tname);
 		InstanceOfExpr exp = new InstanceOfExpr(srcexp, typexp);
 		NameExpr targexp = new NameExpr("v" + vA);
 		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, Operator.assign));

@@ -82,7 +82,7 @@ public class IfTestZ extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr srcexp = new NameExpr("v" + vA);
 		BinaryExpr.Operator opexp = null;
 		switch (operation) {

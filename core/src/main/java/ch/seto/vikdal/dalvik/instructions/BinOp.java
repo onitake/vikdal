@@ -99,7 +99,7 @@ public class BinOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcaexp = new NameExpr("v" + vB);
 		NameExpr srcbexp = new NameExpr("v" + vC);

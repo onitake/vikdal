@@ -54,10 +54,10 @@ public class NewInstance extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
-		// TODO TYPE LOOKUP
-		ClassOrInterfaceType typexp = new ClassOrInterfaceType("TYPE_" + type);
+		String tname = table.lookupType(type);
+		ClassOrInterfaceType typexp = new ClassOrInterfaceType(tname);
 		// object creation and init call are separate in dalvik, the argument list needs to be filled in later
 		ObjectCreationExpr exp = new ObjectCreationExpr(null, typexp, null);
 		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));

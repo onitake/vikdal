@@ -146,7 +146,7 @@ public class ArrayOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr arrexp = new NameExpr("v" + vB);
 		NameExpr idxexp = new NameExpr("v" + vC);
 		ArrayAccessExpr exp = new ArrayAccessExpr(arrexp, idxexp);

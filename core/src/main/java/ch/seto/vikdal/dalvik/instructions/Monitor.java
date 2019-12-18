@@ -73,7 +73,7 @@ public class Monitor extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST() {
+	public Node toAST(SymbolTable table) {
 		NameExpr valexp = new NameExpr("v" + vA);
 		Node ret = null;
 		if (operation == Operation.monitor_enter) {
