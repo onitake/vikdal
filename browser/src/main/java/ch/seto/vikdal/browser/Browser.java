@@ -1,44 +1,78 @@
 package ch.seto.vikdal.browser;
 
-import java.io.*;
-
-import java.util.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutionException;
 import java.util.jar.JarFile;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JSplitPane;
+import javax.swing.JTree;
+import javax.swing.KeyStroke;
+import javax.swing.SpringLayout;
+import javax.swing.SwingWorker;
+import javax.swing.SwingWorker.StateValue;
+import javax.swing.UIManager;
+import javax.swing.border.BevelBorder;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.filechooser.*;
-import javax.swing.tree.*;
-
-import ch.seto.vikdal.ProgressListener;
-import ch.seto.vikdal.dalvik.*;
-import ch.seto.vikdal.dex.*;
-import ch.seto.vikdal.java.*;
-import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
-import ch.seto.vikdal.java.transformers.Decompiler;
-import ch.seto.vikdal.java.transformers.Function;
-import ch.seto.vikdal.java.transformers.GraphEdge;
-import ch.seto.vikdal.java.transformers.GraphNode;
-import ch.seto.vikdal.java.transformers.ProgramVerificationException;
+import org.jgrapht.ext.JGraphXAdapter;
 
 import com.mxgraph.layout.mxGraphLayout;
 import com.mxgraph.layout.hierarchical.mxHierarchicalLayout;
 import com.mxgraph.swing.mxGraphComponent;
 import com.mxgraph.view.mxGraph;
 
-import org.jgrapht.ext.JGraphXAdapter;
-
-import javax.swing.SwingWorker.StateValue;
-import javax.swing.border.BevelBorder;
+import ch.seto.vikdal.ProgressListener;
+import ch.seto.vikdal.dalvik.Instruction;
+import ch.seto.vikdal.dex.Dex;
+import ch.seto.vikdal.dex.DexFormatException;
+import ch.seto.vikdal.java.ClassDescriptor;
+import ch.seto.vikdal.java.ClassMethodDescriptor;
+import ch.seto.vikdal.java.Descriptor;
+import ch.seto.vikdal.java.DescriptorUtils;
+import ch.seto.vikdal.java.FieldDescriptor;
+import ch.seto.vikdal.java.SymbolTable;
+import ch.seto.vikdal.java.transformers.Decompiler;
+import ch.seto.vikdal.java.transformers.Function;
+import ch.seto.vikdal.java.transformers.GraphEdge;
+import ch.seto.vikdal.java.transformers.GraphNode;
+import ch.seto.vikdal.java.transformers.ProgramVerificationException;
 
 // TODO Static value lookups return the type of the
 // value, not the containing class. Fix that!

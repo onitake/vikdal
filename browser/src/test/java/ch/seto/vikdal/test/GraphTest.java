@@ -1,15 +1,20 @@
 package ch.seto.vikdal.test;
 
+import java.awt.Container;
+import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
-
 import java.net.URISyntaxException;
-
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
 
-import java.awt.*;
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.SpringLayout;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -26,7 +31,6 @@ import ch.seto.vikdal.dex.DexFormatException;
 import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.ClassMethodDescriptor;
 import ch.seto.vikdal.java.MethodDescriptor;
-import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
 import ch.seto.vikdal.java.transformers.Decompiler;
 import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.GraphEdge;
