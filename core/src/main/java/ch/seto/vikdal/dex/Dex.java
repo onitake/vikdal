@@ -913,13 +913,13 @@ public class Dex implements SymbolTable {
 	public SortedMap<Integer, Instruction> getCode(int methodid) {
 		if (methodid < 0 || methodid >= method_id_items.size()) return null;
 		MethodId method = method_id_items.get(methodid);
-		if (class_def_items.containsKey(new Long(method.class_idx))) {
-			ClassDef klass = class_def_items.get(new Long(method.class_idx));
-			if (klass.direct_methods.containsKey(new Long(methodid))) {
-				return klass.direct_methods.get(new Long(methodid)).instructions;
+		if (class_def_items.containsKey(Long.valueOf(method.class_idx))) {
+			ClassDef klass = class_def_items.get(Long.valueOf(method.class_idx));
+			if (klass.direct_methods.containsKey(Long.valueOf(methodid))) {
+				return klass.direct_methods.get(Long.valueOf(methodid)).instructions;
 			}
-			if (klass.virtual_methods.containsKey(new Long(methodid))) {
-				return klass.virtual_methods.get(new Long(methodid)).instructions;
+			if (klass.virtual_methods.containsKey(Long.valueOf(methodid))) {
+				return klass.virtual_methods.get(Long.valueOf(methodid)).instructions;
 			}
 		}
 		return null;
@@ -952,8 +952,8 @@ public class Dex implements SymbolTable {
 
 	@Override
 	public ClassDescriptor lookupClass(int index) {
-		if (!class_def_items.containsKey(new Long(index))) return null;
-		ClassDef klass = class_def_items.get(new Long(index));
+		if (!class_def_items.containsKey(Long.valueOf(index))) return null;
+		ClassDef klass = class_def_items.get(Long.valueOf(index));
 		List<Value> statics = new ArrayList<Value>(klass.static_values);
 		List<ClassFieldDescriptor> fields = new ArrayList<ClassFieldDescriptor>();
 		List<Map.Entry<Long, EnumSet<Access>>> entries = new ArrayList<Map.Entry<Long,EnumSet<Access>>>(klass.static_fields.entrySet());
