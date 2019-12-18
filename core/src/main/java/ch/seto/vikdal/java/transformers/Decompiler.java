@@ -9,6 +9,7 @@ import ch.seto.vikdal.java.ClassMethodDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 
 public class Decompiler {
+	@SuppressWarnings("unused")
 	private final SymbolTable table;
 	private final CodeGraphGenerator generator;
 	private final List<Transformer<Function, Function>> transformations;

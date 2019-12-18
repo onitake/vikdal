@@ -41,6 +41,7 @@ public class Dex implements SymbolTable {
 	private final static byte[] DEX_FILE_VERSION_038 = { 0x30, 0x33, 0x38, 0x00 };
 	private final static long ENDIAN_CONSTANT = 0x12345678L;
 	private final static long REVERSE_ENDIAN_CONSTANT = 0x78563412L;
+	@SuppressWarnings("unused")
 	private final static long NO_INDEX = 0xffffffffL;
 	private final static int HEADER_SIZE = 0x70;
 
@@ -64,6 +65,7 @@ public class Dex implements SymbolTable {
 	}
 	
 	private static final class ProtoId {
+		@SuppressWarnings("unused")
 		public long shorty_idx;
 		public long return_type_idx;
 		public long parameters_off;
@@ -136,6 +138,7 @@ public class Dex implements SymbolTable {
 		public long access_flags;
 		public long superclass_idx;
 		public long interfaces_off;
+		@SuppressWarnings("unused")
 		public long source_file_idx;
 		public long annotations_off;
 		public long class_data_off;
@@ -166,6 +169,7 @@ public class Dex implements SymbolTable {
 	private boolean validate;
 	private File dexfile;
 	private byte[] dexdata;
+	@SuppressWarnings("unused")
 	private boolean parsed;
 	private float progress;
 	
@@ -192,6 +196,7 @@ public class Dex implements SymbolTable {
 	private long header_size;
 	private long endian_tag;
 	private List<String> string_table;
+	@SuppressWarnings("unused")
 	private int fileVersion;
 	
 	/**
@@ -614,6 +619,7 @@ public class Dex implements SymbolTable {
 						long annotation_off = reader.readUnsignedInt();
 						long offset3 = reader.getFilePointer();
 						reader.seek(annotation_off);
+						@SuppressWarnings("unused")
 						int visibility = reader.readUnsignedByte();
 						Map.Entry<Long, Map<Long, Value>> annotation = reader.readEncodedAnnotation();
 						annotations.put(annotation.getKey(), annotation.getValue());
@@ -633,6 +639,7 @@ public class Dex implements SymbolTable {
 						long annotation_off = reader.readUnsignedInt();
 						long offset3 = reader.getFilePointer();
 						reader.seek(annotation_off);
+						@SuppressWarnings("unused")
 						int visibility = reader.readUnsignedByte();
 						Map.Entry<Long, Map<Long, Value>> annotation = reader.readEncodedAnnotation();
 						annotations.put(annotation.getKey(), annotation.getValue());
@@ -659,6 +666,7 @@ public class Dex implements SymbolTable {
 								long annotation_off = reader.readUnsignedInt();
 								long offset4 = reader.getFilePointer();
 								reader.seek(annotation_off);
+								@SuppressWarnings("unused")
 								int visibility = reader.readUnsignedByte();
 								Map.Entry<Long, Map<Long, Value>> annotation = reader.readEncodedAnnotation();
 								annotations.put(annotation.getKey(), annotation.getValue());
@@ -680,6 +688,7 @@ public class Dex implements SymbolTable {
 						long annotation_off = reader.readUnsignedInt();
 						long offset2 = reader.getFilePointer();
 						reader.seek(annotation_off);
+						@SuppressWarnings("unused")
 						int visibility = reader.readUnsignedByte();
 						Map.Entry<Long, Map<Long, Value>> annotation = reader.readEncodedAnnotation();
 						klass.class_annotations.put(annotation.getKey(), annotation.getValue());
@@ -775,6 +784,7 @@ public class Dex implements SymbolTable {
 							method.exceptions.add(exception);
 						}
 						long handlers_pos = reader.getFilePointer();
+						@SuppressWarnings("unused")
 						long handlers_size = reader.readUnsignedLEB128();
 						for (TryDef exception : method.exceptions) {
 							reader.seek(handlers_pos + exception.handler_off);
@@ -836,6 +846,7 @@ public class Dex implements SymbolTable {
 							method.exceptions.add(exception);
 						}
 						long handlers_pos = reader.getFilePointer();
+						@SuppressWarnings("unused")
 						long handlers_size = reader.readUnsignedLEB128();
 						for (TryDef exception : method.exceptions) {
 							reader.seek(handlers_pos + exception.handler_off);
