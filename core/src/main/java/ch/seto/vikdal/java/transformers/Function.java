@@ -6,7 +6,7 @@ import ch.seto.vikdal.java.ClassMethodDescriptor;
 
 public class Function {
 	public final ClassMethodDescriptor descriptor;
-	public final GraphNode headerVertex;
+	public GraphNode headerVertex;
 	public final DirectedGraph<GraphNode, GraphEdge> code;
 	
 	public Function(ClassMethodDescriptor descriptor, GraphNode headerVertex, DirectedGraph<GraphNode, GraphEdge> code) {
@@ -20,7 +20,6 @@ public class Function {
 	 */
 	@Override
 	public Function clone() {
-		
 		Function copy = new Function(descriptor, headerVertex, code);
 		return copy;
 	}

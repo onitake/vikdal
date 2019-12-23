@@ -289,7 +289,8 @@ public class Browser {
 			SortedMap<Integer, Instruction> code = dex.getCode(method.methodid);
 			if (code != null) {
 				try {
-					Function fn = decompiler.transform(code, method);
+					Function fn = decompiler.graphify(code, method);
+					fn = decompiler.transform(fn);
 					graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
 			
 					graph.setCellsDeletable(false);

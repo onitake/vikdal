@@ -131,7 +131,7 @@ public class GraphTest extends JFrame implements ListSelectionListener {
 
 		if (code != null) {
 			try {
-				Function fn = decompiler.transform(code, (ClassMethodDescriptor) desc);
+				Function fn = decompiler.graphify(code, (ClassMethodDescriptor) desc);
 				mxGraph graph = new JGraphXAdapter<GraphNode, GraphEdge>(fn.code);
 		
 				graph.setCellsDeletable(false);

@@ -9,6 +9,8 @@ public enum EdgeTag {
 	ENTRY("entry"),
 	CASE("case"),
 	DATA("data"),
+	THEN("then"),
+	ELSE("else"),
 	;
 	
 	private String description;

@@ -11,11 +11,7 @@ import ch.seto.vikdal.dex.Dex;
 import ch.seto.vikdal.dex.DexFormatException;
 import ch.seto.vikdal.java.ClassDescriptor;
 import ch.seto.vikdal.java.ClassMethodDescriptor;
-import ch.seto.vikdal.java.code.Method;
-import ch.seto.vikdal.java.transformers.AstGenerator;
-import ch.seto.vikdal.java.transformers.CodeGraphGenerator;
 import ch.seto.vikdal.java.transformers.Decompiler;
-import ch.seto.vikdal.java.transformers.Function;
 import ch.seto.vikdal.java.transformers.ProgramVerificationException;
 import japa.parser.ast.Node;
 
@@ -105,9 +101,8 @@ public class AstTest {
 		}
 		SortedMap<Integer, Instruction> code = dex.getCode(methodId);
 		try {
-			Function fn = decompiler.transform(code, cm);
-			Method m = new AstGenerator(dex).transformToStatements(fn);
-			return m.getASTBody();
+			Node node = decompiler.decompile(code, cm);
+			return node;
 		} catch (ProgramVerificationException e) {
 			throw new RuntimeException("Can't decompile", e);
 		}
