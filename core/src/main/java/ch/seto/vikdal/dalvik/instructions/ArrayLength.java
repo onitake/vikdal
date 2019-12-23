@@ -6,12 +6,12 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.AssignExpr.Operator;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class ArrayLength extends AbstractInstruction {
 
@@ -54,11 +54,11 @@ public class ArrayLength extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr arrexp = new NameExpr("v" + vB);
 		FieldAccessExpr exp = new FieldAccessExpr(arrexp, "length");
 		NameExpr targexp = new NameExpr("v" + vA);
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, exp, Operator.assign));
 		ret.setData(this);
 		return ret;
 	}

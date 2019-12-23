@@ -7,12 +7,12 @@ import ch.seto.vikdal.java.FieldDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.AssignExpr.Operator;
-import japa.parser.ast.stmt.ExpressionStmt;
 import japa.parser.ast.expr.FieldAccessExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class InstanceOp extends AbstractInstruction {
 
@@ -119,12 +119,12 @@ public class InstanceOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr srcexp = new NameExpr("v" + vB);
 		FieldDescriptor fdesc = table.lookupField(field);
 		FieldAccessExpr exp = new FieldAccessExpr(srcexp, fdesc.name);
 		NameExpr valexp = new NameExpr("v" + vA);
-		Node ret = null;
+		Statement ret = null;
 		switch (operation) {
 		case iget:
 		case iget_boolean:

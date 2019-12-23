@@ -5,11 +5,11 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.AssignExpr.Operator;
-import japa.parser.ast.stmt.ExpressionStmt;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class BinOp2Addr extends AbstractInstruction {
 
@@ -98,7 +98,7 @@ public class BinOp2Addr extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcexp = new NameExpr("v" + vB);
 		Operator opexp = null;
@@ -161,7 +161,7 @@ public class BinOp2Addr extends AbstractInstruction {
 		if (opexp == null) {
 			throw new RuntimeException("Invalid operation: " + operation.toString());
 		}
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, srcexp, opexp));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, srcexp, opexp));
 		ret.setData(this);
 		return ret;
 	}	

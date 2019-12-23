@@ -5,10 +5,10 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.BinaryExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.IfStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class IfTest extends AbstractInstruction {
 
@@ -82,7 +82,7 @@ public class IfTest extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr srcaexp = new NameExpr("v" + vA);
 		NameExpr srcbexp = new NameExpr("v" + vB);
 		BinaryExpr.Operator opexp = null;
@@ -110,7 +110,7 @@ public class IfTest extends AbstractInstruction {
 			throw new RuntimeException("Invalid operation: " + operation.toString());
 		}
 		BinaryExpr exp = new BinaryExpr(srcaexp, srcbexp, opexp);
-		Node ret = new IfStmt(exp, null, null);
+		Statement ret = new IfStmt(exp, null, null);
 		ret.setData(this);
 		return ret;
 	}

@@ -6,12 +6,12 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.ArrayAccessExpr;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.AssignExpr.Operator;
-import japa.parser.ast.stmt.ExpressionStmt;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class ArrayOp extends AbstractInstruction {
 
@@ -146,12 +146,12 @@ public class ArrayOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr arrexp = new NameExpr("v" + vB);
 		NameExpr idxexp = new NameExpr("v" + vC);
 		ArrayAccessExpr exp = new ArrayAccessExpr(arrexp, idxexp);
 		NameExpr valexp = new NameExpr("v" + vA);
-		Node ret = null;
+		Statement ret = null;
 		switch (operation) {
 		case aget:
 		case aget_boolean:

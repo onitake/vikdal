@@ -2,9 +2,9 @@ package ch.seto.vikdal.dalvik.instructions;
 
 import ch.seto.vikdal.dalvik.Format;
 import ch.seto.vikdal.java.SymbolTable;
-import japa.parser.ast.Node;
 import japa.parser.ast.comments.BlockComment;
 import japa.parser.ast.stmt.EmptyStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class Nop extends AbstractInstruction {
 	
@@ -26,8 +26,8 @@ public class Nop extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
-		Node ret = new EmptyStmt();
+	public Statement toAST(SymbolTable table) {
+		Statement ret = new EmptyStmt();
 		ret.setComment(new BlockComment("NOP"));
 		ret.setData(this);
 		return ret;

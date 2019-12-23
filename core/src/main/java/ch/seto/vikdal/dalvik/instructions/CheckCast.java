@@ -6,12 +6,12 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.AssignExpr.Operator;
-import japa.parser.ast.stmt.ExpressionStmt;
 import japa.parser.ast.expr.CastExpr;
 import japa.parser.ast.expr.NameExpr;
+import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class CheckCast extends AbstractInstruction {
@@ -56,11 +56,11 @@ public class CheckCast extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		String tname = table.lookupType(type);
 		NameExpr varexp = new NameExpr("v" + vA);
 		CastExpr exp = new CastExpr(new ClassOrInterfaceType(tname), varexp);
-		Node ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));
 		ret.setData(this);
 		return ret;
 	}

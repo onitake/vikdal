@@ -6,9 +6,9 @@ import java.util.Arrays;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.body.MultiTypeParameter;
 import japa.parser.ast.stmt.CatchClause;
+import japa.parser.ast.stmt.Statement;
 import japa.parser.ast.stmt.TryStmt;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
@@ -84,7 +84,7 @@ public class Catch extends PseudoInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		ArrayList<CatchClause> catexps = new ArrayList<CatchClause>();
 		for (int type : types) {
 			String tname = table.lookupType(type);
@@ -92,7 +92,7 @@ public class Catch extends PseudoInstruction {
 			MultiTypeParameter typpar = new MultiTypeParameter(0, null, Arrays.asList(typexp), null);
 			catexps.add(new CatchClause(typpar, null));
 		}
-		Node ret = new TryStmt(null, catexps, null);
+		Statement ret = new TryStmt(null, catexps, null);
 		ret.setData(this);
 		return ret;
 	}

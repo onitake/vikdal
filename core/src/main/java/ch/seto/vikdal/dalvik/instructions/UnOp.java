@@ -6,13 +6,13 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.CastExpr;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.UnaryExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 import japa.parser.ast.type.PrimitiveType;
 import japa.parser.ast.type.PrimitiveType.Primitive;
 
@@ -133,7 +133,7 @@ public class UnOp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcexp = new NameExpr("v" + vB);
 		Expression exp = null;
@@ -181,7 +181,7 @@ public class UnOp extends AbstractInstruction {
 		if (exp == null) {
 			throw new RuntimeException("Invalid operation: " + operation.toString());
 		}
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
 		ret.setData(this);
 		return ret;
 	}	

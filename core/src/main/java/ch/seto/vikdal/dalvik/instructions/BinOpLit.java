@@ -5,12 +5,12 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.BinaryExpr;
 import japa.parser.ast.expr.IntegerLiteralExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class BinOpLit extends AbstractInstruction {
 
@@ -108,7 +108,7 @@ public class BinOpLit extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcexp = new NameExpr("v" + vB);
 		IntegerLiteralExpr valexp = new IntegerLiteralExpr(String.valueOf(value));
@@ -165,7 +165,7 @@ public class BinOpLit extends AbstractInstruction {
 		} else {
 			exp = new BinaryExpr(srcexp, valexp, opexp);
 		}
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
 		ret.setData(this);
 		return ret;
 	}	

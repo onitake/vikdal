@@ -4,8 +4,8 @@ import ch.seto.vikdal.dalvik.Format;
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
-import japa.parser.ast.Node;
 import japa.parser.ast.stmt.ReturnStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class ReturnVoid extends AbstractInstruction {
 	
@@ -34,8 +34,8 @@ public class ReturnVoid extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
-		Node ret = new ReturnStmt();
+	public Statement toAST(SymbolTable table) {
+		Statement ret = new ReturnStmt();
 		ret.setData(this);
 		return ret;
 	}

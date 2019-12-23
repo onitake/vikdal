@@ -6,11 +6,11 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.LongLiteralExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class ConstWide extends AbstractInstruction {
 
@@ -93,10 +93,10 @@ public class ConstWide extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		LongLiteralExpr exp = new LongLiteralExpr(String.valueOf(value));
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
 		ret.setData(this);
 		return ret;
 	}

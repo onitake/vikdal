@@ -10,13 +10,13 @@ import ch.seto.vikdal.java.MethodDescriptor;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.ClassExpr;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.QualifiedNameExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class Invoke extends AbstractInstruction {
@@ -136,7 +136,7 @@ public class Invoke extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		MethodDescriptor mdesc = table.lookupMethod(method);
 		ArrayList<Expression> argsexp = new ArrayList<Expression>();
 		Expression classexp = null;
@@ -175,7 +175,7 @@ public class Invoke extends AbstractInstruction {
 		if (classexp == null) {
 			throw new RuntimeException("Invalid operation: " + operation.toString());
 		}
-		Node ret = new ExpressionStmt(new MethodCallExpr(classexp, mdesc.name, argsexp));
+		Statement ret = new ExpressionStmt(new MethodCallExpr(classexp, mdesc.name, argsexp));
 		ret.setData(this);
 		return ret;
 	}

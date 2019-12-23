@@ -6,13 +6,13 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
+import japa.parser.ast.expr.AssignExpr.Operator;
 import japa.parser.ast.expr.Expression;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.StringLiteralExpr;
-import japa.parser.ast.expr.AssignExpr.Operator;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class ConstObject extends AbstractInstruction {
 
@@ -80,7 +80,7 @@ public class ConstObject extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		Expression exp = null;
 		if (operation == Operation.const_class) {
 			String tname = table.lookupType(value);
@@ -90,7 +90,7 @@ public class ConstObject extends AbstractInstruction {
 			exp = new StringLiteralExpr(str);
 		}
 		NameExpr varexp = new NameExpr("v" + vA);
-		Node ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(varexp, exp, Operator.assign));
 		ret.setData(this);
 		return ret;
 	}

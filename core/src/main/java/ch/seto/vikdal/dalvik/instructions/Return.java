@@ -5,9 +5,9 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.ReturnStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class Return extends AbstractInstruction {
 
@@ -68,9 +68,9 @@ public class Return extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr valexp = new NameExpr("v" + vA);
-		Node ret = new ReturnStmt(valexp);
+		Statement ret = new ReturnStmt(valexp);
 		ret.setData(this);
 		return ret;
 	}

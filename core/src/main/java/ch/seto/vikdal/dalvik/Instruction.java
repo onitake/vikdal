@@ -2,7 +2,7 @@ package ch.seto.vikdal.dalvik;
 
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
+import japa.parser.ast.stmt.Statement;
 
 public interface Instruction {
 	/**
@@ -94,5 +94,5 @@ public interface Instruction {
 	 * Transforms this instruction into an AST node.
 	 * @param table a symbol table to retrieve data from
 	 */
-	public Node toAST(SymbolTable table);
+	public Statement toAST(SymbolTable table);
 }

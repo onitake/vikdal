@@ -5,11 +5,11 @@ import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.BinaryExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 
 public class Cmp extends AbstractInstruction {
 
@@ -69,7 +69,7 @@ public class Cmp extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		NameExpr srcaexp = new NameExpr("v" + vB);
 		NameExpr srcbexp = new NameExpr("v" + vC);
@@ -91,7 +91,7 @@ public class Cmp extends AbstractInstruction {
 			throw new RuntimeException("Invalid operation: " + operation.toString());
 		}
 		BinaryExpr exp = new BinaryExpr(srcaexp, srcbexp, opexp);
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
 		ret.setData(this);
 		return ret;
 	}

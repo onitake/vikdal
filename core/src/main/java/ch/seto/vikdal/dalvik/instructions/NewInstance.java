@@ -6,11 +6,11 @@ import ch.seto.vikdal.dalvik.InstructionFactory;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.transformers.StateTracker;
-import japa.parser.ast.Node;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.NameExpr;
 import japa.parser.ast.expr.ObjectCreationExpr;
 import japa.parser.ast.stmt.ExpressionStmt;
+import japa.parser.ast.stmt.Statement;
 import japa.parser.ast.type.ClassOrInterfaceType;
 
 public class NewInstance extends AbstractInstruction {
@@ -54,13 +54,13 @@ public class NewInstance extends AbstractInstruction {
 	}
 
 	@Override
-	public Node toAST(SymbolTable table) {
+	public Statement toAST(SymbolTable table) {
 		NameExpr targexp = new NameExpr("v" + vA);
 		String tname = table.lookupType(type);
 		ClassOrInterfaceType typexp = new ClassOrInterfaceType(tname);
 		// object creation and init call are separate in dalvik, the argument list needs to be filled in later
 		ObjectCreationExpr exp = new ObjectCreationExpr(null, typexp, null);
-		Node ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
+		Statement ret = new ExpressionStmt(new AssignExpr(targexp, exp, AssignExpr.Operator.assign));
 		ret.setData(this);
 		return ret;
 	}
