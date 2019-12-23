@@ -3,6 +3,7 @@ package ch.seto.vikdal.java.code;
 import java.util.*;
 
 import ch.seto.vikdal.java.Modifier;
+import ch.seto.vikdal.java.SymbolTable;
 import japa.parser.ast.TypeParameter;
 import japa.parser.ast.body.BodyDeclaration;
 import japa.parser.ast.body.ConstructorDeclaration;
@@ -45,7 +46,7 @@ public class Method {
 		return type == null;
 	}
 	
-	public BodyDeclaration getASTBody() {
+	public BodyDeclaration getASTBody(SymbolTable table) {
 		int mods = 0;
 		for (Modifier mod : modifiers) {
 			mods |= mod.javaModifier;
@@ -65,11 +66,11 @@ public class Method {
 		List<NameExpr> exceptions = null;
 		BodyDeclaration decl;
 		if (isConstructor()) {
-			decl = new ConstructorDeclaration(mods, annotations, typeParameters, name, params, exceptions, (BlockStmt) block.toASTStatement());
+			decl = new ConstructorDeclaration(mods, annotations, typeParameters, name, params, exceptions, (BlockStmt) block.toASTStatement(table));
 		} else {
 			Type typ = new ClassOrInterfaceType(type);
 			int arrayDimensions = 0;
-			decl = new MethodDeclaration(mods, annotations, typeParameters, typ, name, params, arrayDimensions, exceptions, (BlockStmt) block.toASTStatement());
+			decl = new MethodDeclaration(mods, annotations, typeParameters, typ, name, params, arrayDimensions, exceptions, (BlockStmt) block.toASTStatement(table));
 		}
 		return decl;
 	}

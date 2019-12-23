@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import ch.seto.vikdal.java.SymbolTable;
 import japa.parser.ast.expr.AssignExpr;
 import japa.parser.ast.expr.MethodCallExpr;
 import japa.parser.ast.expr.NameExpr;
@@ -37,7 +38,7 @@ public class FunctionCall implements Expression, Statement {
 	}
 	
 	@Override
-	public japa.parser.ast.stmt.Statement toASTStatement() {
+	public japa.parser.ast.stmt.Statement toASTStatement(SymbolTable table) {
 		return new ExpressionStmt(toASTExpression());
 	}
 

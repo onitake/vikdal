@@ -1,5 +1,7 @@
 package ch.seto.vikdal.java.transformers;
 
+import org.jgrapht.traverse.DepthFirstIterator;
+
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.Type;
 import ch.seto.vikdal.java.code.Block;
@@ -57,16 +59,15 @@ public class AstGenerator {
 	/**
 	 * Transforms a node into code, generating code blocks recursively where appropriate.
 	 * @param fn the function descriptor
-	 * @param vertex the current vertex
+	 * @param vertex the current graph node
 	 * @return a new code block containing all instructions below this node
 	 */
 	private Block instructifyGraph(Function fn, GraphNode vertex) {
-		Block ret = new Block();
-		// generate an expression block
-		/*if (vertex.getInstruction() instanceof Entry) {
-			
-		}*/
-		return ret;
+		DepthFirstIterator<GraphNode, GraphEdge> dfs = new DepthFirstIterator<>(fn.code);
+		InstructionGenerator gen = new InstructionGenerator();
+		dfs.addTraversalListener(gen);
+		for (; dfs.hasNext(); dfs.next());
+		return gen.getBlock();
 	}
 
 }
