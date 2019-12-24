@@ -28,13 +28,29 @@ public class Decompiler {
 	public Decompiler(SymbolTable table) {
 		this.table = table;
 		transformer = new ArrayList<>();
+		ast = new AstGenerator(table);
+		addDefaultTransformers();
+	}
+	
+	public void addDefaultTransformers() {
 		transformer.add(new FunctionHeaderGenerator());
 		transformer.add(new BranchGenerator());
 		transformer.add(new DeadCodeCleaner());
 		transformer.add(new ExceptionAugmenter());
 		transformer.add(new GotoCleaner());
 		transformer.add(new FunctionSymbolicator(table));
-		ast = new AstGenerator(table);
+	}
+	
+	public void clearTransformers() {
+		transformer.clear();
+	}
+	
+	public void addTransformer(Transformer<Function, Function> transformer) {
+		this.transformer.add(transformer);
+	}
+	
+	public void removeTransformer(Transformer<Function, Function> transformer) {
+		this.transformer.remove(transformer);
 	}
 
 	public Function graphify(SortedMap<Integer, Instruction> input, ClassMethodDescriptor method) {
