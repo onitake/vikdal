@@ -12,7 +12,6 @@ import org.jgrapht.traverse.DepthFirstIterator;
 
 import ch.seto.vikdal.dalvik.Instruction;
 import ch.seto.vikdal.java.ClassMethodDescriptor;
-import ch.seto.vikdal.java.EmptySymbolTable;
 import ch.seto.vikdal.java.SymbolTable;
 import ch.seto.vikdal.java.code.Method;
 
